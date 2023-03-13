@@ -9,6 +9,8 @@ import (
 	"github.com/mailgun/groupcache/v2"
 
 	"github.com/darvaza-proxy/cache"
+	"github.com/darvaza-proxy/cache/internal"
+	"github.com/darvaza-proxy/core"
 	"github.com/darvaza-proxy/slog"
 )
 
@@ -17,24 +19,67 @@ var (
 	_ cache.Cache = (*Group)(nil)
 )
 
-// Pool implements a cache.Store using mailgun's groupcache
+// NewPool creates a Store placeholder to be used as entrypoint
+// to a previously initialised groupcache
+func NewPool() *Pool {
+	return &Pool{}
+}
+
+// Pool implements a cache.Store using mailgun's groupcache.
+// Groupcache is global so the Pool object doesn't contain anything
 type Pool struct{}
 
 // NewCache creates a new Group
-func (*Pool) NewCache(string, int64, cache.Getter) cache.Cache {
+func (p *Pool) NewCache(name string, cacheBytes int64, getter cache.Getter) cache.Cache {
+	// wrap
+	fn := func(ctx context.Context, key string, dst groupcache.Sink) error {
+		sink, ok := internal.Sink(ctx)
+		if ok {
+			return p.getBridged(ctx, key, getter, sink, dst)
+		}
+
+		// unreachable
+		core.Panicf("groupcache[%q]: %s", name, "where is my sink??")
+		return cache.ErrInvalid
+	}
+
+	if g := groupcache.NewGroup(name, cacheBytes,
+		groupcache.GetterFunc(fn)); g != nil {
+		return &Group{g}
+	}
 	return nil
 }
 
+// getBridged calls the getter using the Sink in the context, and then copies the
+// binary encoded representation in groupcache's Sink so it gets cached
+func (*Pool) getBridged(ctx context.Context, key string,
+	getter cache.Getter, sink cache.Sink, dst groupcache.Sink) error {
+	//
+	err := getter.Get(ctx, key, sink)
+	if err == nil {
+		// good. store it in dst for the cache
+		err = dst.SetBytes(sink.Bytes(), sink.Expire())
+	}
+	return err
+}
+
 // GetCache returns a named Group previously created
-func (*Pool) GetCache(string) cache.Cache {
+func (*Pool) GetCache(name string) cache.Cache {
+	if g := groupcache.GetGroup(name); g != nil {
+		return &Group{g}
+	}
 	return nil
 }
 
 // DeregisterCache removes a Group from the Pool
-func (*Pool) DeregisterCache(string) {}
+func (*Pool) DeregisterCache(name string) {
+	groupcache.DeregisterGroup(name)
+}
 
 // SetLogger attaches a slog.Logger to groupcache
-func (*Pool) SetLogger(slog.Logger) {}
+func (*Pool) SetLogger(log slog.Logger) {
+	SetLogger(log)
+}
 
 // Group implements cache.Cache around a groupcache.Group
 type Group struct {
@@ -47,19 +92,73 @@ func (g *Group) Name() string {
 }
 
 // Set adds an entry to the Group
-func (*Group) Set(context.Context, string, []byte, time.Time, cache.Type) error {
-	return nil
+func (g *Group) Set(ctx context.Context, key string, value []byte,
+	expire time.Time, t cache.Type) error {
+	//
+	var hot bool
+	if t == cache.HotCache {
+		hot = true
+	}
+
+	return g.g.Set(ctx, key, value, expire, hot)
 }
 
 // Get reads an entry into a Sink
-func (*Group) Get(context.Context, string, cache.Sink) error {
-	return nil
+func (g *Group) Get(ctx context.Context, key string, sink cache.Sink) error {
+	var b groupcache.ByteView
+
+	if sink == nil {
+		return cache.ErrInvalid
+	}
+
+	// get a clean slate and attach sink to the context
+	sink.Reset()
+	ctx = internal.WithSink(ctx, sink)
+
+	s := groupcache.ByteViewSink(&b)
+	err := g.g.Get(ctx, key, s)
+	if err != nil {
+		return err
+	}
+
+	if sink.Len() > 0 {
+		// the sink we passed via the context was used.
+		// we are ready.
+		return nil
+	}
+
+	// it was a cache hit, so we read the encoded data
+	// for the ByteView we created
+	e := b.Expire()
+	bytes := b.ByteSlice()
+	return sink.SetBytes(bytes, e)
 }
 
 // Remove removes an entry from the Group
-func (*Group) Remove(context.Context, string) {}
+func (g *Group) Remove(ctx context.Context, key string) {
+	g.g.Remove(ctx, key)
+}
 
 // Stats returns stats about the Group
-func (*Group) Stats(cache.Type) cache.Stats {
-	return cache.Stats{}
+func (g *Group) Stats(t cache.Type) cache.Stats {
+	var t1 groupcache.CacheType
+	switch t {
+	case cache.MainCache:
+		t1 = groupcache.MainCache
+	case cache.HotCache:
+		t1 = groupcache.HotCache
+	default:
+		// invalid type
+		return cache.Stats{}
+	}
+
+	s1 := g.g.CacheStats(t1)
+	s := cache.Stats{
+		Bytes:     s1.Bytes,
+		Items:     s1.Items,
+		Gets:      s1.Gets,
+		Hits:      s1.Hits,
+		Evictions: s1.Evictions,
+	}
+	return s
 }
