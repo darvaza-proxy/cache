@@ -73,6 +73,10 @@ type Sink interface {
 	// Bytes returns the value encoded as a slice
 	// of bytes
 	Bytes() []byte
+
+	// Expire returns the time whe this entry will
+	// be evicted from the Cache
+	Expire() time.Time
 }
 
 // A Getter loads data for a key.
