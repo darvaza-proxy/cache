@@ -73,7 +73,7 @@ EOT
 			cd=
 		else
 			k="$x"
-			cd="cd 'handlers/$x' \&\& "
+			cd="cd 'x/$x' \&\& "
 		fi
 
 		callx="$call"
@@ -103,7 +103,7 @@ EOT
 			elif [ "tidy" = "$cmd" ]; then
 				exclude=
 				for x in $PROJECTS; do
-					exclude="${exclude:+$exclude }-exclude ./handlers/$x/..."
+					exclude="${exclude:+$exclude }-exclude ./x/$x/..."
 				done
 				callx=$(echo "$call" | sed -e "s;\(REVIVE)\);\1 $exclude;")
 			elif [ -n "$cmdx" ]; then
