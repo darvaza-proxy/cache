@@ -3,9 +3,16 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/darvaza-proxy/slog"
+)
+
+var (
+	// ErrInvalid is returned by the Sink when the set
+	// value is of the wrong type
+	ErrInvalid = errors.New("invalid type")
 )
 
 // A Store allows us to create or access Cache namespaces
