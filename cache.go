@@ -81,9 +81,16 @@ type Sink interface {
 	// of bytes
 	Bytes() []byte
 
+	// Len tells the length of the internally encoded
+	// representation of the value
+	Len() int
+
 	// Expire returns the time whe this entry will
 	// be evicted from the Cache
 	Expire() time.Time
+
+	// Reset empties the content of the Sink
+	Reset()
 }
 
 // A Getter loads data for a key.

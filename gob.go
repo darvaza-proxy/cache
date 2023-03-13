@@ -23,8 +23,13 @@ type GobSink[T any] struct {
 // Bytes returns the Gob encoded representation of the object
 // in the Sink
 func (sink *GobSink[T]) Bytes() []byte {
-	// TODO: do we need to copy them?
 	return sink.bytes
+}
+
+// Len returns the length of the Gob encoded representation of the
+// object in the Sink. 0 if empty.
+func (sink *GobSink[T]) Len() int {
+	return len(sink.bytes)
 }
 
 // Expire tells when this object will be evicted from the Cache
