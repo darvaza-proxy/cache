@@ -17,7 +17,7 @@ V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell if [ "$$(tput colors 2> /dev/null || echo 0)" -ge 8 ]; then printf "\033[34;1m▶\033[0m"; else printf "▶"; fi)
 
-HANDLERS = $(shell find handlers -name go.mod | cut -d/ -f2)
+MODULES = $(shell find x -name go.mod | cut -d/ -f2)
 
 TMPDIR ?= .tmp
 
@@ -28,7 +28,7 @@ clean: ; $(info $(M) cleaning…)
 
 $(TMPDIR)/gen.mk: internal/tools/gen_mk.sh Makefile ; $(info $(M) generating subproject rules)
 	$Q mkdir -p $(@D)
-	$Q $< $(HANDLERS) > $@~
+	$Q $< $(MODULES) > $@~
 	$Q if cmp $@ $@~ 2> /dev/null >&2; then rm $@~; else mv $@~ $@; fi
 
 include $(TMPDIR)/gen.mk
