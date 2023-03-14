@@ -4,6 +4,7 @@ package groupcache
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/mailgun/groupcache/v2"
@@ -15,8 +16,10 @@ import (
 )
 
 var (
-	_ cache.Store = (*Pool)(nil)
-	_ cache.Cache = (*Group)(nil)
+	_ cache.Store  = (*HTTPPool)(nil)
+	_ http.Handler = (*HTTPPool)(nil)
+	_ cache.Store  = (*Pool)(nil)
+	_ cache.Cache  = (*Group)(nil)
 )
 
 // NewPool creates a Store placeholder to be used as entrypoint
@@ -25,9 +28,54 @@ func NewPool() *Pool {
 	return &Pool{}
 }
 
+// HTTPPool implements a cache.Store using mailgun's groupcache.HTTPPool.
+type HTTPPool struct {
+	Pool
+
+	pool *groupcache.HTTPPool
+}
+
+// ServeHTTP handles the BasePath of the cache. "/_groupcache/" if unspecified.
+func (p *HTTPPool) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	p.pool.ServeHTTP(rw, req)
+}
+
+// NewHTTPPoolOpts initializes an HTTP pool of peers with the given options.
+// Unlike NewHTTPPool, this function does not register the created pool as
+// an HTTP handler.
+//
+// Due to groupcache's own limitations you have to choose to use either
+// HTTPPool or NoPeersPool. There can be only one.
+func NewHTTPPoolOpts(self string, opts *groupcache.HTTPPoolOptions) *HTTPPool {
+	if pool := groupcache.NewHTTPPoolOpts(self, opts); pool != nil {
+		return &HTTPPool{
+			pool: pool,
+		}
+	}
+	return nil
+}
+
+// NewHTTPPool initialises an HTTP pool of peers, and registers itself as a PeerPicker
+// Due to groupcache's own limitations you have to choose to use either
+// HTTPPool or NoPeersPool. There can be only one.
+func NewHTTPPool(self string) *HTTPPool {
+	return NewHTTPPoolOpts(self, nil)
+}
+
 // Pool implements a cache.Store using mailgun's groupcache.
 // Groupcache is global so the Pool object doesn't contain anything
 type Pool struct{}
+
+// NewNoPeersPool initialises groupcache with a PeerPicker that never find a peer
+// Due to groupcache's own limitations you have to choose to use either
+// HTTPPool or NoPeersPool. There can be only one.
+func NewNoPeersPool() *Pool {
+	pool := &groupcache.NoPeers{}
+	groupcache.RegisterPeerPicker(func() groupcache.PeerPicker {
+		return pool
+	})
+	return &Pool{}
+}
 
 // NewCache creates a new Group
 func (p *Pool) NewCache(name string, cacheBytes int64, getter cache.Getter) cache.Cache {
