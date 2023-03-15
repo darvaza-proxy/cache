@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/darvaza-proxy/core v0.5.3
 	github.com/darvaza-proxy/slog v0.4.5
-	github.com/mgechev/revive v1.2.5
+	github.com/mgechev/revive v1.3.0
 )
 
 require (
