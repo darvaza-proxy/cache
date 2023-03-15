@@ -1,4 +1,4 @@
-module github.com/darvaza-proxy/cache/handlers/groupcache
+module github.com/darvaza-proxy/cache/x/groupcache
 
 go 1.19
 
