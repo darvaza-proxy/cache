@@ -188,6 +188,33 @@ func (m *LRU[K, T]) evictElement(le *list.Element) {
 	}
 }
 
+// ForEach allows you to iterate over all non-expired entries in the Cache.
+// ForEach will automatically evict any expired entry it finds along the way,
+// and it will stop if the callback returns true.
+func (m *LRU[K, T]) ForEach(fn func(K, T, int, time.Time) bool) {
+	if fn != nil {
+		core.ListForEachElement(m.eviction, func(le *list.Element) bool {
+			return m.forEachIter(le, fn)
+		})
+	}
+}
+
+func (m *LRU[K, T]) forEachIter(le *list.Element, fn func(K, T, int, time.Time) bool) bool {
+	var ex time.Time
+
+	p := le.Value.(*entry[K, T])
+	if p.Expired() {
+		m.evictElement(le)
+		return false
+	}
+
+	if p.expire != nil {
+		ex = *p.expire
+	}
+
+	return fn(p.key, p.value, p.size, ex)
+}
+
 type entry[K comparable, T any] struct {
 	key    K
 	value  T
