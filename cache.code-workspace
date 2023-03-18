@@ -7,6 +7,9 @@
 			"path": "x/groupcache"
 		},
 		{
+			"path": "x/memcache"
+		},
+		{
 			"path": "x/simplelru"
 		}
 	]
