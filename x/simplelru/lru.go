@@ -92,15 +92,28 @@ func (m *LRU) Remove(key string) {
 
 // Get tries to find an entry, and returns its value and if it was found
 func (m *LRU) Get(key string) (any, bool) {
+	v, _, ok := m.GetWithExpire(key)
+	return v, ok
+}
+
+// GetWithExpire tries to find an entry, and returns its value, expiration date,
+// and if it was found
+func (m *LRU) GetWithExpire(key string) (any, time.Time, bool) {
 	if le, ok := m.items[key]; ok {
 		p := le.Value.(*entry)
 		if !p.Expired() {
+			var e time.Time
+
 			m.eviction.MoveToBack(le)
-			return p.value, true
+			if ex := p.expire; ex != nil {
+				e = *ex
+			}
+
+			return p.value, e, true
 		}
 		m.evictElement(le)
 	}
-	return nil, false
+	return nil, time.Time{}, false
 }
 
 // Prune removes entries if space is needed. It tries
