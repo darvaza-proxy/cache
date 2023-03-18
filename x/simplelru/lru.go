@@ -11,20 +11,20 @@ import (
 
 // LRU Implements a least-recently-used cache with a maximum size and
 // optional expiration date
-type LRU struct {
+type LRU[K comparable, T any] struct {
 	maxSize  int
 	size     int
 	count    int
-	items    map[string]*list.Element
+	items    map[K]*list.Element
 	eviction *list.List
-	onEvict  func(string, any, int)
+	onEvict  func(K, T, int)
 }
 
 // NewLRU creates a new LRU with maximum size and eviction callback
-func NewLRU(size int, onEvict func(string, any, int)) *LRU {
-	lru := &LRU{
+func NewLRU[K comparable, T any](size int, onEvict func(K, T, int)) *LRU[K, T] {
+	lru := &LRU[K, T]{
 		maxSize:  size,
-		items:    make(map[string]*list.Element),
+		items:    make(map[K]*list.Element),
 		eviction: list.New(),
 		onEvict:  onEvict,
 	}
@@ -32,29 +32,29 @@ func NewLRU(size int, onEvict func(string, any, int)) *LRU {
 }
 
 // Len returns the number of entries in the cache
-func (m *LRU) Len() int {
+func (m *LRU[K, T]) Len() int {
 	return m.count
 }
 
 // Size returns the added size of all entries in the cache
-func (m *LRU) Size() int {
+func (m *LRU[K, T]) Size() int {
 	return m.size
 }
 
 // Available tells how much space is available without evictions
-func (m *LRU) Available() int {
+func (m *LRU[K, T]) Available() int {
 	return m.maxSize - m.size
 }
 
 // Add adds an entry of a given size and optional expiration date, and
 // returns true if entries were removed
-func (m *LRU) Add(key string, value any, size int, expire time.Time) bool {
+func (m *LRU[K, T]) Add(key K, value T, size int, expire time.Time) bool {
 	var ex *time.Time
 	if !expire.IsZero() {
 		ex = &expire
 	}
 
-	e := entry{
+	e := entry[K, T]{
 		key:    key,
 		value:  value,
 		size:   size,
@@ -66,7 +66,7 @@ func (m *LRU) Add(key string, value any, size int, expire time.Time) bool {
 		m.eviction.MoveToBack(le)
 
 		// old
-		p := le.Value.(*entry)
+		p := le.Value.(*entry[K, T])
 		m.size -= p.size
 		// new
 		*p = e
@@ -84,23 +84,24 @@ func (m *LRU) Add(key string, value any, size int, expire time.Time) bool {
 }
 
 // Remove removes an entry if present
-func (m *LRU) Remove(key string) {
+func (m *LRU[K, T]) Remove(key K) {
 	if le, ok := m.items[key]; ok {
 		m.evictElement(le)
 	}
 }
 
 // Get tries to find an entry, and returns its value and if it was found
-func (m *LRU) Get(key string) (any, bool) {
+func (m *LRU[K, T]) Get(key K) (T, bool) {
 	v, _, ok := m.GetWithExpire(key)
 	return v, ok
 }
 
 // GetWithExpire tries to find an entry, and returns its value, expiration date,
 // and if it was found
-func (m *LRU) GetWithExpire(key string) (any, time.Time, bool) {
+func (m *LRU[K, T]) GetWithExpire(key K) (T, time.Time, bool) {
+	var zero T
 	if le, ok := m.items[key]; ok {
-		p := le.Value.(*entry)
+		p := le.Value.(*entry[K, T])
 		if !p.Expired() {
 			var e time.Time
 
@@ -113,19 +114,19 @@ func (m *LRU) GetWithExpire(key string) (any, time.Time, bool) {
 		}
 		m.evictElement(le)
 	}
-	return nil, time.Time{}, false
+	return zero, time.Time{}, false
 }
 
 // Prune removes entries if space is needed. It tries
 // the oldests expired first, and then just the oldests.
-func (m *LRU) Prune() bool {
+func (m *LRU[K, T]) Prune() bool {
 	evicted := false
 
 	if m.Available() < 0 {
 		// evict expired first
 		core.ListForEachElement(m.eviction,
 			func(le *list.Element) bool {
-				p := le.Value.(*entry)
+				p := le.Value.(*entry[K, T])
 				if p.Expired() {
 					evicted = true
 					m.evictElement(le)
@@ -149,8 +150,8 @@ func (m *LRU) Prune() bool {
 	return evicted
 }
 
-func (m *LRU) evictElement(le *list.Element) {
-	p := le.Value.(*entry)
+func (m *LRU[K, T]) evictElement(le *list.Element) {
+	p := le.Value.(*entry[K, T])
 
 	// remove from eviction list
 	m.eviction.Remove(le)
@@ -167,14 +168,14 @@ func (m *LRU) evictElement(le *list.Element) {
 	}
 }
 
-type entry struct {
-	key    string
-	value  any
+type entry[K comparable, T any] struct {
+	key    K
+	value  T
 	size   int
 	expire *time.Time
 }
 
-func (e *entry) Expired() bool {
+func (e *entry[K, T]) Expired() bool {
 	if e.expire == nil {
 		return false
 	}
