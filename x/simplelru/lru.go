@@ -154,6 +154,22 @@ func (m *LRU[K, T]) Prune() bool {
 	return evicted
 }
 
+// EvictExpired scans the whole cache and evicts all expired entries
+func (m *LRU[K, T]) EvictExpired() bool {
+	var evicted bool
+	core.ListForEachElement(m.eviction,
+		func(le *list.Element) bool {
+			p := le.Value.(*entry[K, T])
+			if p.Expired() {
+				evicted = true
+				m.evictElement(le)
+			}
+
+			return false
+		})
+	return evicted
+}
+
 func (m *LRU[K, T]) evictElement(le *list.Element) {
 	p := le.Value.(*entry[K, T])
 
