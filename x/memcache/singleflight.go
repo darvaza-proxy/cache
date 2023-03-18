@@ -45,6 +45,11 @@ func NewSingleFlight(name string, inward AdderGetter[string], outward cache.Gett
 	return sf
 }
 
+// Name returns the name of the Cache namespace
+func (sf *SingleFlight) Name() string {
+	return sf.name
+}
+
 // revive:disable:cognitive-complexity
 // revive:disable:cyclomatic
 // revive:disable:function-length
