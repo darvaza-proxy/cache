@@ -46,6 +46,10 @@ func (m *LRU[K, T]) Available() int {
 	return m.maxSize - m.size
 }
 
+func (m *LRU[K, T]) needsPruning() bool {
+	return m.size > m.maxSize
+}
+
 // Add adds an entry of a given size and optional expiration date, and
 // returns true if entries were removed
 func (m *LRU[K, T]) Add(key K, value T, size int, expire time.Time) bool {
@@ -122,7 +126,7 @@ func (m *LRU[K, T]) GetWithExpire(key K) (T, time.Time, bool) {
 func (m *LRU[K, T]) Prune() bool {
 	evicted := false
 
-	if m.Available() < 0 {
+	if m.needsPruning() {
 		// evict expired first
 		core.ListForEachElement(m.eviction,
 			func(le *list.Element) bool {
@@ -132,18 +136,18 @@ func (m *LRU[K, T]) Prune() bool {
 					m.evictElement(le)
 				}
 
-				return m.Available() >= 0
+				return !m.needsPruning()
 			})
 	}
 
-	if m.Available() < 0 {
+	if m.needsPruning() {
 		// evict oldest
 		core.ListForEachElement(m.eviction,
 			func(le *list.Element) bool {
 				evicted = true
 				m.evictElement(le)
 
-				return m.Available() >= 0
+				return !m.needsPruning()
 			})
 	}
 
