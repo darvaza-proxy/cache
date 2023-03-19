@@ -15,6 +15,11 @@ var (
 	ErrInvalid = errors.New("invalid type")
 )
 
+var (
+	_ Getter = Cache(nil)
+	_ Setter = Cache(nil)
+)
+
 // A Store allows us to create or access Cache namespaces
 type Store interface {
 	// GetCache returns the named cache previously created with
