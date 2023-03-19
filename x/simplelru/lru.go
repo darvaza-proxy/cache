@@ -87,8 +87,8 @@ func (m *LRU[K, T]) Add(key K, value T, size int, expire time.Time) bool {
 	return m.Prune()
 }
 
-// Remove removes an entry if present
-func (m *LRU[K, T]) Remove(key K) {
+// Evict removes an entry if present
+func (m *LRU[K, T]) Evict(key K) {
 	if le, ok := m.items[key]; ok {
 		m.evictElement(le)
 	}
