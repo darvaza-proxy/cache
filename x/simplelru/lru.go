@@ -84,25 +84,19 @@ func (m *LRU[K, T]) Add(key K, value T, size int, expire time.Time) bool {
 	}
 
 	// evict entries if needed
-	return m.Prune()
+	return m.prune()
 }
 
-// Remove removes an entry if present
-func (m *LRU[K, T]) Remove(key K) {
+// Evict removes an entry if present
+func (m *LRU[K, T]) Evict(key K) {
 	if le, ok := m.items[key]; ok {
 		m.evictElement(le)
 	}
 }
 
-// Get tries to find an entry, and returns its value and if it was found
-func (m *LRU[K, T]) Get(key K) (T, bool) {
-	v, _, ok := m.GetWithExpire(key)
-	return v, ok
-}
-
-// GetWithExpire tries to find an entry, and returns its value, expiration date,
+// Get tries to find an entry, and returns its value, expiration date,
 // and if it was found
-func (m *LRU[K, T]) GetWithExpire(key K) (T, time.Time, bool) {
+func (m *LRU[K, T]) Get(key K) (T, time.Time, bool) {
 	var zero T
 	if le, ok := m.items[key]; ok {
 		p := le.Value.(*entry[K, T])
@@ -121,9 +115,9 @@ func (m *LRU[K, T]) GetWithExpire(key K) (T, time.Time, bool) {
 	return zero, time.Time{}, false
 }
 
-// Prune removes entries if space is needed. It tries
+// prune removes entries if space is needed. It tries
 // the oldests expired first, and then just the oldests.
-func (m *LRU[K, T]) Prune() bool {
+func (m *LRU[K, T]) prune() bool {
 	evicted := false
 
 	if m.needsPruning() {
