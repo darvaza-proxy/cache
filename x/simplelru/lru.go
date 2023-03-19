@@ -94,15 +94,9 @@ func (m *LRU[K, T]) Evict(key K) {
 	}
 }
 
-// Get tries to find an entry, and returns its value and if it was found
-func (m *LRU[K, T]) Get(key K) (T, bool) {
-	v, _, ok := m.GetWithExpire(key)
-	return v, ok
-}
-
-// GetWithExpire tries to find an entry, and returns its value, expiration date,
+// Get tries to find an entry, and returns its value, expiration date,
 // and if it was found
-func (m *LRU[K, T]) GetWithExpire(key K) (T, time.Time, bool) {
+func (m *LRU[K, T]) Get(key K) (T, time.Time, bool) {
 	var zero T
 	if le, ok := m.items[key]; ok {
 		p := le.Value.(*entry[K, T])
