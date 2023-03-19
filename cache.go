@@ -111,3 +111,20 @@ type GetterFunc func(ctx context.Context, key string, dest Sink) error
 func (f GetterFunc) Get(ctx context.Context, key string, dest Sink) error {
 	return f(ctx, key, dest)
 }
+
+// A Setter stores data for a key
+type Setter interface {
+	Set(ctx context.Context, key string, value []byte,
+		expire time.Time, cacheType Type) error
+}
+
+// A SetterFunc implements Setter with a function
+type SetterFunc func(ctx context.Context, key string, value []byte,
+	expire time.Time, cacheType Type) error
+
+// Set allows a SetterFunc to implement the Setter interface
+func (f SetterFunc) Set(ctx context.Context, key string, value []byte,
+	expire time.Time, cacheType Type) error {
+	//
+	return f(ctx, key, value, expire, cacheType)
+}
