@@ -1,5 +1,3 @@
-github.com/darvaza-proxy/cache v0.0.5 h1:W6q6kN6EoFDQJ2bUeaflRLPaAvB3yLM4jBIZC6B3Hlg=
-github.com/darvaza-proxy/cache v0.0.5/go.mod h1:7Qlj0y988fKbSYCELYD6tykiTqgUfcVXDb0EGSUqYLM=
 github.com/darvaza-proxy/core v0.6.5 h1:El8PxD6l4MnLq6ofR075Y/4ApJVWTjcRJl0y9K6Hqzc=
 github.com/darvaza-proxy/core v0.6.5/go.mod h1:FHUkT+KktIBMMwtdSwsSzienEncwI7EI9OKaOZvT5IU=
 github.com/darvaza-proxy/slog v0.4.6 h1:7q5WjWCd4EU5c9ZRIVYst4sJFh2OYJRS3FqEyRMRrK0=
