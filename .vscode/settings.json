@@ -1,6 +1,7 @@
 {
 	"files.exclude": {
 		"x/groupcache": true,
+		"x/memcache": true,
 		"x/simplelru": true
 	}
 }
