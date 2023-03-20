@@ -20,21 +20,25 @@ type LRU[K comparable] struct {
 	mu      sync.Mutex
 	lru     *simplelru.LRU[K, []byte]
 	unit    uint
+	onSet   func(K, []byte, int64, *time.Time)
 	onEvict func(K, []byte, int64)
 	stats   cache.Stats
 }
 
 // NewLRU creates a new []byte [LRU] with maximum size and eviction
-func NewLRU[K comparable](cacheBytes int64, onEvict func(K, []byte, int64)) *LRU[K] {
+func NewLRU[K comparable](cacheBytes int64,
+	onSet func(K, []byte, int64, *time.Time),
+	onEvict func(K, []byte, int64)) *LRU[K] {
 	unit := calculateUnit(cacheBytes)
 	size := bytesToSize(unit, cacheBytes)
 
 	m := &LRU[K]{
 		unit:    unit,
+		onSet:   onSet,
 		onEvict: onEvict,
 	}
 
-	lru := simplelru.NewLRU(size, nil, m.evictionCallback)
+	lru := simplelru.NewLRU(size, m.setCallback, m.evictionCallback)
 	m.lru = lru
 
 	return m
@@ -47,6 +51,18 @@ func (m *LRU[K]) evictionCallback(key K, value []byte, size int) {
 	if m.onEvict != nil {
 		// and inform the user
 		m.onEvict(key, value, m.fromUnit(size))
+	}
+}
+
+func (m *LRU[K]) setCallback(key K, value []byte, size int, expire time.Time) {
+	if m.onSet != nil {
+		var ex *time.Time
+
+		if !expire.IsZero() {
+			ex = &expire
+		}
+
+		m.onSet(key, value, m.fromUnit(size), ex)
 	}
 }
 
