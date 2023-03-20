@@ -15,6 +15,11 @@ var (
 	ErrInvalid = errors.New("invalid type")
 )
 
+var (
+	_ Getter = Cache(nil)
+	_ Setter = Cache(nil)
+)
+
 // A Store allows us to create or access Cache namespaces
 type Store interface {
 	// GetCache returns the named cache previously created with
@@ -110,4 +115,21 @@ type GetterFunc func(ctx context.Context, key string, dest Sink) error
 // Get allows a GetterFunc to implement the Getter interface
 func (f GetterFunc) Get(ctx context.Context, key string, dest Sink) error {
 	return f(ctx, key, dest)
+}
+
+// A Setter stores data for a key
+type Setter interface {
+	Set(ctx context.Context, key string, value []byte,
+		expire time.Time, cacheType Type) error
+}
+
+// A SetterFunc implements Setter with a function
+type SetterFunc func(ctx context.Context, key string, value []byte,
+	expire time.Time, cacheType Type) error
+
+// Set allows a SetterFunc to implement the Setter interface
+func (f SetterFunc) Set(ctx context.Context, key string, value []byte,
+	expire time.Time, cacheType Type) error {
+	//
+	return f(ctx, key, value, expire, cacheType)
 }
