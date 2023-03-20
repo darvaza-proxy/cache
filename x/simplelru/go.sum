@@ -1,2 +1,6 @@
-github.com/darvaza-proxy/core v0.6.2 h1:V57aNLpJDD902KS8x+0RJMHwbOQM+Bc+vgRUu8fa/GE=
-github.com/darvaza-proxy/core v0.6.2/go.mod h1:OREVy0VqPnMbZRYBb0RPXl0OFhLTwbLLu1/Vn1SMl9g=
+github.com/darvaza-proxy/core v0.6.5 h1:El8PxD6l4MnLq6ofR075Y/4ApJVWTjcRJl0y9K6Hqzc=
+github.com/darvaza-proxy/core v0.6.5/go.mod h1:FHUkT+KktIBMMwtdSwsSzienEncwI7EI9OKaOZvT5IU=
+golang.org/x/net v0.8.0 h1:Zrh2ngAOFYneWTAIAPethzeaQLuHwhuBkuV6ZiRnUaQ=
+golang.org/x/net v0.8.0/go.mod h1:QVkue5JL9kW//ek3r6jTKnTFis1tRmNAW2P1shuFdJc=
+golang.org/x/text v0.8.0 h1:57P1ETyNKtuIjB4SRd15iJxuhj8Gc416Y78H3qgMh68=
+golang.org/x/text v0.8.0/go.mod h1:e1OnstbJyHTd6l/uOt8jFFHp6TRDWZR/bV3emEE/zU8=
