@@ -7,6 +7,7 @@ import (
 
 	"github.com/darvaza-proxy/cache"
 	"github.com/darvaza-proxy/core"
+	"github.com/darvaza-proxy/slog"
 )
 
 var (
@@ -17,7 +18,9 @@ var (
 // SingleFlight is a man-in-the-middle between [cache.Cache] and
 // our [LRU] to prevent stampedes
 type SingleFlight struct {
+	name    string
 	mu      sync.Mutex
+	log     slog.Logger
 	inward  AdderGetter[string]
 	outward cache.Getter
 	getters map[string]*outreacher
@@ -27,12 +30,13 @@ type SingleFlight struct {
 // local cache and a [cache.Getter] to acquire the data externally.
 // [SingleFlight] will prevent multiple requests for the same key to reach out
 // at the same time.
-func NewSingleFlight(inward AdderGetter[string], outward cache.Getter) *SingleFlight {
+func NewSingleFlight(name string, inward AdderGetter[string], outward cache.Getter) *SingleFlight {
 	if inward == nil || outward == nil {
 		core.Panic("missing parameters")
 	}
 
 	sf := &SingleFlight{
+		name:    name,
 		inward:  inward,
 		outward: outward,
 		getters: make(map[string]*outreacher),
@@ -42,17 +46,26 @@ func NewSingleFlight(inward AdderGetter[string], outward cache.Getter) *SingleFl
 }
 
 // revive:disable:cognitive-complexity
+// revive:disable:cyclomatic
+// revive:disable:function-length
 
 // Get attempts to get the value of a key from its internal cache, otherwise reaches
 // out to the provided [cache.Getter], but only once. While this is in process any other
 // request for the same key will be held until we have a response from from the first.
 func (sf *SingleFlight) Get(ctx context.Context, key string, dest cache.Sink) error {
 	// revive:enable:cognitive-complexity
+	// revive:enable:cyclomatic
+	// revive:enable:function-length
 	sf.mu.Lock()
 
 	if v, ex, ok := sf.inward.Get(key); ok {
 		// cache hit
 		defer sf.mu.Unlock()
+
+		if log, ok := sf.withDebug(); ok {
+			log.WithField("key", key).
+				Print("hit")
+		}
 
 		var expire time.Time
 		if ex != nil {
@@ -62,15 +75,33 @@ func (sf *SingleFlight) Get(ctx context.Context, key string, dest cache.Sink) er
 	}
 
 	// cache miss
+	if log, ok := sf.withDebug(); ok {
+		log.WithField("key", key).
+			Print("miss")
+	}
+
 	cond, first := sf.getCond(key)
 	if !first {
 		// wait patiently
+		if log, ok := sf.withDebug(); ok {
+			log.WithField("key", key).
+				Print("waiting...")
+		}
 		cond.Wait()
 
 		defer sf.mu.Unlock()
 		if err := cond.Err(); err != nil {
 			// failed
+			if log, ok := sf.withDebug(); ok {
+				log.WithField("key", key).
+					Println("failed:", err)
+			}
 			return err
+		}
+
+		if log, ok := sf.withDebug(); ok {
+			log.WithField("key", key).
+				Print("ready")
 		}
 
 		// store copy on the [cache.Sink]
@@ -79,6 +110,10 @@ func (sf *SingleFlight) Get(ctx context.Context, key string, dest cache.Sink) er
 
 	// reach out
 	sf.mu.Unlock()
+	if log, ok := sf.withDebug(); ok {
+		log.WithField("key", key).
+			Print("getting...")
+	}
 	err := sf.outward.Get(ctx, key, dest)
 	// and lock again
 	sf.mu.Lock()
@@ -87,6 +122,12 @@ func (sf *SingleFlight) Get(ctx context.Context, key string, dest cache.Sink) er
 	if err == nil {
 		// successfully acquired the value
 		value, expire := dest.Bytes(), dest.Expire()
+
+		if log, ok := sf.withDebug(); ok {
+			log.WithField("key", key).
+				WithField("size", len(value)).
+				Print("success")
+		}
 
 		// store inward
 		sf.inward.Add(key, value, expire)
@@ -99,10 +140,23 @@ func (sf *SingleFlight) Get(ctx context.Context, key string, dest cache.Sink) er
 
 	if cond.Ok() {
 		// someone provided the value for us. happy days
-		return dest.SetBytes(cond.Bytes(), cond.Expire())
+		value, expire := cond.Bytes(), cond.Expire()
+
+		if log, ok := sf.withDebug(); ok {
+			log.WithField("key", key).
+				WithField("size", len(value)).
+				Print("thank you!")
+		}
+
+		return dest.SetBytes(value, expire)
 	}
 
 	// failed to acquire a value
+	if log, ok := sf.withDebug(); ok {
+		log.WithField("key", key).
+			Println("failed:", err)
+	}
+
 	cond.SetError(err)
 	return err
 }
@@ -122,6 +176,29 @@ func (sf *SingleFlight) Set(_ context.Context, key string, value []byte,
 		p.SetBytes(value, expire)
 	}
 	return nil
+}
+
+// SetLogger attaches a [slog.Logger] to this [SingleFlight] quasi-[cache.Cache]
+func (sf *SingleFlight) SetLogger(log slog.Logger) {
+	sf.mu.Lock()
+	defer sf.mu.Unlock()
+
+	sf.log = log
+}
+
+func (sf *SingleFlight) withLogger(level slog.LogLevel) (slog.Logger, bool) {
+	if sf.log != nil {
+		log, ok := sf.log.WithLevel(level).WithEnabled()
+		if ok {
+			log = log.WithField("cache", sf.name)
+			return log, true
+		}
+	}
+	return nil, false
+}
+
+func (sf *SingleFlight) withDebug() (slog.Logger, bool) {
+	return sf.withLogger(slog.Debug)
 }
 
 func (sf *SingleFlight) getCond(key string) (*outreacher, bool) {
