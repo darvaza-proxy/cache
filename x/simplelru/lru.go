@@ -17,15 +17,20 @@ type LRU[K comparable, T any] struct {
 	count    int
 	items    map[K]*list.Element
 	eviction *list.List
+	onAdd    func(K, T, int, time.Time)
 	onEvict  func(K, T, int)
 }
 
 // NewLRU creates a new LRU with maximum size and eviction callback
-func NewLRU[K comparable, T any](size int, onEvict func(K, T, int)) *LRU[K, T] {
+func NewLRU[K comparable, T any](size int,
+	onAdd func(K, T, int, time.Time),
+	onEvict func(K, T, int)) *LRU[K, T] {
+	//
 	lru := &LRU[K, T]{
 		maxSize:  size,
 		items:    make(map[K]*list.Element),
 		eviction: list.New(),
+		onAdd:    onAdd,
 		onEvict:  onEvict,
 	}
 	return lru
@@ -84,7 +89,14 @@ func (m *LRU[K, T]) Add(key K, value T, size int, expire time.Time) bool {
 	}
 
 	// evict entries if needed
-	return m.prune()
+	evicted := m.prune()
+
+	if m.onAdd != nil {
+		// notify the user
+		m.onAdd(key, value, size, expire)
+	}
+
+	return evicted
 }
 
 // Evict removes an entry if present
