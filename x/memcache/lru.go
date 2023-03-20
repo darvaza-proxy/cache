@@ -15,6 +15,28 @@ const (
 	GiB = KiB * MiB // GiB is 2^30 (gigabyte)
 )
 
+// Getter represents an interface providing the Get() method of [LRU]
+type Getter[K comparable] interface {
+	Get(key K) ([]byte, *time.Time, bool)
+}
+
+// Adder represents an interface providing the Add() method of [LRU]
+type Adder[K comparable] interface {
+	Add(key K, value []byte, expire time.Time) bool
+}
+
+// AdderGetter represents an interface providing both Get and Add of [LRU]
+type AdderGetter[K comparable] interface {
+	Getter[K]
+	Adder[K]
+}
+
+var (
+	_ Adder[string]       = (*LRU[string])(nil)
+	_ Getter[string]      = (*LRU[string])(nil)
+	_ AdderGetter[string] = (*LRU[string])(nil)
+)
+
 // LRU is a least-recently-used cache of bytes with TTL and maximum size
 type LRU[K comparable] struct {
 	mu      sync.Mutex
