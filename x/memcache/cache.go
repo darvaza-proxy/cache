@@ -3,7 +3,7 @@ package memcache
 import (
 	"context"
 
-	"github.com/darvaza-proxy/cache"
+	"darvaza.org/cache"
 )
 
 var (

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/darvaza-proxy/cache"
-	"github.com/darvaza-proxy/cache/x/simplelru"
+	"darvaza.org/cache"
+	"darvaza.org/cache/x/simplelru"
 )
 
 const (

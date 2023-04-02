@@ -1,4 +1,4 @@
-module github.com/darvaza-proxy/cache
+module darvaza.org/cache
 
 go 1.19
 

@@ -1,4 +1,4 @@
-module github.com/darvaza-proxy/cache/x/simplelru
+module darvaza.org/cache/x/simplelru
 
 go 1.19
 

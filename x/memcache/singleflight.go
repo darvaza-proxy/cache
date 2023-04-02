@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"darvaza.org/cache"
 	"darvaza.org/core"
 	"darvaza.org/slog"
-	"github.com/darvaza-proxy/cache"
 )
 
 var (

@@ -4,9 +4,9 @@ package memcache
 import (
 	"sync"
 
+	"darvaza.org/cache"
 	"darvaza.org/core"
 	"darvaza.org/slog"
-	"github.com/darvaza-proxy/cache"
 )
 
 var (

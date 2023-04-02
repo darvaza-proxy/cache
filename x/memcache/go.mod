@@ -1,17 +1,17 @@
-module github.com/darvaza-proxy/cache/x/memcache
+module darvaza.org/cache/x/memcache
 
 go 1.19
 
 replace (
-	github.com/darvaza-proxy/cache => ../..
-	github.com/darvaza-proxy/cache/x/simplelru => ../simplelru
+	darvaza.org/cache => ../..
+	darvaza.org/cache/x/simplelru => ../simplelru
 )
 
 require (
+	darvaza.org/cache v0.0.5
+	darvaza.org/cache/x/simplelru v0.0.3
 	darvaza.org/core v0.9.0
 	darvaza.org/slog v0.5.0
-	github.com/darvaza-proxy/cache v0.0.5
-	github.com/darvaza-proxy/cache/x/simplelru v0.0.3
 )
 
 require (

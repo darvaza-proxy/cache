@@ -1,5 +1,5 @@
 // Package groupcache provides a groupcache backed implementation
-// of github.com/darvaza-proxy/cache
+// of darvaza.org/cache
 package groupcache
 
 import (
@@ -9,10 +9,10 @@ import (
 
 	"github.com/mailgun/groupcache/v2"
 
+	"darvaza.org/cache"
+	"darvaza.org/cache/internal"
 	"darvaza.org/core"
 	"darvaza.org/slog"
-	"github.com/darvaza-proxy/cache"
-	"github.com/darvaza-proxy/cache/internal"
 )
 
 var (
