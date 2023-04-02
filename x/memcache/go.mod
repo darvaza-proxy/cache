@@ -8,10 +8,10 @@ replace (
 )
 
 require (
+	darvaza.org/core v0.9.0
+	darvaza.org/slog v0.5.0
 	github.com/darvaza-proxy/cache v0.0.5
 	github.com/darvaza-proxy/cache/x/simplelru v0.0.3
-	github.com/darvaza-proxy/core v0.6.5
-	github.com/darvaza-proxy/slog v0.4.6
 )
 
 require (

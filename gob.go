@@ -5,7 +5,7 @@ import (
 	"encoding/gob"
 	"time"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 var (

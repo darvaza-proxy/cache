@@ -9,10 +9,10 @@ import (
 
 	"github.com/mailgun/groupcache/v2"
 
+	"darvaza.org/core"
+	"darvaza.org/slog"
 	"github.com/darvaza-proxy/cache"
 	"github.com/darvaza-proxy/cache/internal"
-	"github.com/darvaza-proxy/core"
-	"github.com/darvaza-proxy/slog"
 )
 
 var (

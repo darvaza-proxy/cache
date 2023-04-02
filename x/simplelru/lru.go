@@ -6,7 +6,7 @@ import (
 	"container/list"
 	"time"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // LRU Implements a least-recently-used cache with a maximum size and

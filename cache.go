@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/darvaza-proxy/slog"
+	"darvaza.org/slog"
 )
 
 var (
