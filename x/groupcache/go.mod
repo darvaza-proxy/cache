@@ -5,9 +5,9 @@ go 1.19
 replace darvaza.org/cache => ../../
 
 require (
-	darvaza.org/cache v0.1.0
+	darvaza.org/cache v0.2.0
 	darvaza.org/core v0.9.2
-	darvaza.org/slog v0.5.0
+	darvaza.org/slog v0.5.1
 	github.com/mailgun/groupcache/v2 v2.4.2
 )
 
