@@ -10,7 +10,6 @@ import (
 	"github.com/mailgun/groupcache/v2"
 
 	"darvaza.org/cache"
-	"darvaza.org/cache/internal"
 	"darvaza.org/core"
 	"darvaza.org/slog"
 )
@@ -81,7 +80,7 @@ func NewNoPeersPool() *Pool {
 func (p *Pool) NewCache(name string, cacheBytes int64, getter cache.Getter) cache.Cache {
 	// wrap
 	fn := func(ctx context.Context, key string, dst groupcache.Sink) error {
-		sink, ok := internal.Sink(ctx)
+		sink, ok := ctxSink.Get(ctx)
 		if ok {
 			return p.getBridged(ctx, key, getter, sink, dst)
 		}
@@ -161,7 +160,7 @@ func (g *Group) Get(ctx context.Context, key string, sink cache.Sink) error {
 
 	// get a clean slate and attach sink to the context
 	sink.Reset()
-	ctx = internal.WithSink(ctx, sink)
+	ctx = ctxSink.WithValue(ctx, sink)
 
 	s := groupcache.ByteViewSink(&b)
 	err := g.g.Get(ctx, key, s)
