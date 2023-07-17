@@ -11,6 +11,7 @@ GOBIN ?= $(GOPATH)/bin
 
 TOOLSDIR := $(CURDIR)/internal/tools
 TMPDIR ?= .tmp
+OUTDIR ?= $(TMPDIR)
 
 REVIVE ?= $(GOBIN)/revive
 REVIVE_CONF ?= $(TOOLSDIR)/revive.toml
@@ -25,6 +26,9 @@ Q = $(if $(filter 1,$V),,@)
 M = $(shell if [ "$$(tput colors 2> /dev/null || echo 0)" -ge 8 ]; then printf "\033[34;1m▶\033[0m"; else printf "▶"; fi)
 
 all: get generate tidy build
+
+GO_BUILD = $(GO) build -v
+GO_BUILD_CMD = $(GO_BUILD) -o "$(OUTDIR)"
 
 clean: ; $(info $(M) cleaning…)
 	rm -rf $(TMPDIR)
