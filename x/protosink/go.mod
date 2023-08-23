@@ -10,9 +10,9 @@ require (
 )
 
 require (
-	darvaza.org/core v0.9.5 // indirect
-	darvaza.org/slog v0.5.2 // indirect
+	darvaza.org/core v0.9.7 // indirect
+	darvaza.org/slog v0.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	golang.org/x/net v0.12.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 )

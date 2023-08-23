@@ -10,11 +10,11 @@ replace (
 require (
 	darvaza.org/cache v0.2.1
 	darvaza.org/cache/x/simplelru v0.1.2
-	darvaza.org/core v0.9.5
-	darvaza.org/slog v0.5.2
+	darvaza.org/core v0.9.7
+	darvaza.org/slog v0.5.3
 )
 
 require (
-	golang.org/x/net v0.12.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 )
