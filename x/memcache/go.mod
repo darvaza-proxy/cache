@@ -8,8 +8,8 @@ replace (
 )
 
 require (
-	darvaza.org/cache v0.2.1
-	darvaza.org/cache/x/simplelru v0.1.2
+	darvaza.org/cache v0.2.2
+	darvaza.org/cache/x/simplelru v0.1.3
 	darvaza.org/core v0.9.7
 	darvaza.org/slog v0.5.3
 )
