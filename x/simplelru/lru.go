@@ -55,6 +55,27 @@ func (m *LRU[K, T]) needsPruning() bool {
 	return m.size > m.maxSize
 }
 
+func (m *LRU[K, T]) getEntry(key K) (*list.Element, *entry[K, T], bool) {
+	le, ok := m.items[key]
+	if !ok {
+		return nil, nil, false
+	}
+
+	p, ok := m.getListEntry(le)
+	if !ok {
+		// not possible
+		delete(m.items, key)
+		return nil, nil, false
+	}
+
+	return le, p, true
+}
+
+func (*LRU[K, T]) getListEntry(le *list.Element) (*entry[K, T], bool) {
+	p, ok := le.Value.(*entry[K, T])
+	return p, ok
+}
+
 // Add adds an entry of a given size and optional expiration date, and
 // returns true if entries were removed
 func (m *LRU[K, T]) Add(key K, value T, size int, expire time.Time) bool {
@@ -70,12 +91,11 @@ func (m *LRU[K, T]) Add(key K, value T, size int, expire time.Time) bool {
 		expire: ex,
 	}
 
-	if le, ok := m.items[key]; ok {
+	if le, p, ok := m.getEntry(key); ok {
 		// update entry
 		m.eviction.MoveToBack(le)
 
 		// old
-		p := le.Value.(*entry[K, T])
 		m.size -= p.size
 		// new
 		*p = e
@@ -110,8 +130,7 @@ func (m *LRU[K, T]) Evict(key K) {
 // and if it was found
 func (m *LRU[K, T]) Get(key K) (T, time.Time, bool) {
 	var zero T
-	if le, ok := m.items[key]; ok {
-		p := le.Value.(*entry[K, T])
+	if le, p, ok := m.getEntry(key); ok {
 		if !p.Expired() {
 			var e time.Time
 
@@ -128,36 +147,60 @@ func (m *LRU[K, T]) Get(key K) (T, time.Time, bool) {
 }
 
 // prune removes entries if space is needed. It tries
-// the oldests expired first, and then just the oldests.
+// the oldest expired first, and then just the oldest.
 func (m *LRU[K, T]) prune() bool {
-	evicted := false
+	var evicted bool
 
 	if m.needsPruning() {
 		// evict expired first
-		core.ListForEachElement(m.eviction,
-			func(le *list.Element) bool {
-				p := le.Value.(*entry[K, T])
-				if p.Expired() {
-					evicted = true
-					m.evictElement(le)
-				}
-
-				return !m.needsPruning()
-			})
+		if m.pruneLoop(true) {
+			evicted = true
+		}
 	}
 
 	if m.needsPruning() {
 		// evict oldest
-		core.ListForEachElement(m.eviction,
-			func(le *list.Element) bool {
-				evicted = true
-				m.evictElement(le)
-
-				return !m.needsPruning()
-			})
+		if m.pruneLoop(false) {
+			evicted = true
+		}
 	}
 
 	return evicted
+}
+
+// revive:disable:flag-parameter
+func (m *LRU[K, T]) pruneLoop(onlyExpired bool) bool {
+	// revive:enable:flag-parameter
+	var evicted bool
+
+	core.ListForEachElement(m.eviction,
+		func(le *list.Element) bool {
+			if m.pruneEvict(le, onlyExpired) {
+				evicted = true
+			}
+			return !m.needsPruning()
+		})
+
+	return evicted
+}
+
+func (m *LRU[K, T]) pruneEvict(le *list.Element, onlyExpired bool) bool {
+	var evict bool
+	p, ok := m.getListEntry(le)
+	switch {
+	case !ok:
+		evict = true
+	case !onlyExpired:
+		evict = true
+	default:
+		evict = p.Expired()
+	}
+
+	if evict {
+		m.evictElement(le)
+	}
+
+	return evict
 }
 
 // EvictExpired scans the whole cache and evicts all expired entries
@@ -165,8 +208,8 @@ func (m *LRU[K, T]) EvictExpired() bool {
 	var evicted bool
 	core.ListForEachElement(m.eviction,
 		func(le *list.Element) bool {
-			p := le.Value.(*entry[K, T])
-			if p.Expired() {
+			p, ok := m.getListEntry(le)
+			if !ok || p.Expired() {
 				evicted = true
 				m.evictElement(le)
 			}
@@ -177,10 +220,15 @@ func (m *LRU[K, T]) EvictExpired() bool {
 }
 
 func (m *LRU[K, T]) evictElement(le *list.Element) {
-	p := le.Value.(*entry[K, T])
+	p, ok := m.getListEntry(le)
 
 	// remove from eviction list
 	m.eviction.Remove(le)
+
+	if !ok {
+		return
+	}
+
 	// remove from items
 	delete(m.items, p.key)
 	// remove from size
@@ -208,8 +256,8 @@ func (m *LRU[K, T]) ForEach(fn func(K, T, int, time.Time) bool) {
 func (m *LRU[K, T]) forEachIter(le *list.Element, fn func(K, T, int, time.Time) bool) bool {
 	var ex time.Time
 
-	p := le.Value.(*entry[K, T])
-	if p.Expired() {
+	p, ok := m.getListEntry(le)
+	if !ok || p.Expired() {
 		m.evictElement(le)
 		return false
 	}
