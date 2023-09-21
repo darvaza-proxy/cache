@@ -9,7 +9,7 @@ replace (
 
 require (
 	darvaza.org/cache v0.2.2
-	darvaza.org/cache/x/simplelru v0.1.3
+	darvaza.org/cache/x/simplelru v0.1.4
 	darvaza.org/core v0.9.9
 	darvaza.org/slog v0.5.4
 )
