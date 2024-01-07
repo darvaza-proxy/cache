@@ -6,8 +6,8 @@ replace darvaza.org/cache => ../../
 
 require (
 	darvaza.org/cache v0.2.2
-	darvaza.org/core v0.9.9
-	darvaza.org/slog v0.5.4
+	darvaza.org/core v0.11.2
+	darvaza.org/slog v0.5.5
 	github.com/mailgun/groupcache/v2 v2.5.0
 )
 
@@ -17,8 +17,8 @@ require (
 	github.com/segmentio/fasthash v1.0.3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
-	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
