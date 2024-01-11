@@ -3,8 +3,8 @@ module darvaza.org/cache
 go 1.19
 
 require (
-	darvaza.org/core v0.11.2
-	darvaza.org/slog v0.5.5
+	darvaza.org/core v0.11.3
+	darvaza.org/slog v0.5.6
 )
 
 require github.com/mgechev/revive v1.3.4
@@ -22,7 +22,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.16.1 // indirect
