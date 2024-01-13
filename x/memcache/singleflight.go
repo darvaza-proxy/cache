@@ -239,10 +239,10 @@ type outreacher struct {
 // Expire returns the error set by a failed outward.Get()
 func (p *outreacher) Err() error { return p.err }
 
-// Expire returns the data set by a succesful outward.Get()
+// Expire returns the data set by a successful outward.Get()
 func (p *outreacher) Bytes() []byte { return p.b }
 
-// Expire returns the expiration date set by a succesful outward.Get()
+// Expire returns the expiration date set by a successful outward.Get()
 func (p *outreacher) Expire() time.Time { return p.ex }
 
 // Ok tells if a value has been stored
