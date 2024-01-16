@@ -9,26 +9,32 @@ GOGENERATE_FLAGS = -v
 GOPATH ?= $(shell $(GO) env GOPATH)
 GOBIN ?= $(GOPATH)/bin
 
-TOOLSDIR := $(CURDIR)/internal/tools
+TOOLSDIR := $(CURDIR)/internal/build
 TMPDIR ?= .tmp
-OUTDIR ?= $(TMPDIR)
+
+GOLANGCI_LINT_VERSION ?= v1.55
+REVIVE_VERSION ?= v1.3.6
+
+GOLANGCI_LINT ?= $(GOBIN)/golangci-lint
+GOLANGCI_LINT_URL ?= github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 
 REVIVE ?= $(GOBIN)/revive
 REVIVE_CONF ?= $(TOOLSDIR)/revive.toml
 REVIVE_RUN_ARGS ?= -config $(REVIVE_CONF) -formatter friendly
-REVIVE_INSTALL_URL ?= github.com/mgechev/revive
+REVIVE_INSTALL_URL ?= github.com/mgechev/revive@$(REVIVE_VERSION)
 
 GO_INSTALL_URLS = \
+	$(GOLANGCI_LINT_URL) \
 	$(REVIVE_INSTALL_URL) \
 
 V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell if [ "$$(tput colors 2> /dev/null || echo 0)" -ge 8 ]; then printf "\033[34;1m▶\033[0m"; else printf "▶"; fi)
 
-all: get generate tidy build
-
 GO_BUILD = $(GO) build -v
-GO_BUILD_CMD = $(GO_BUILD) -o "$(OUTDIR)"
+GO_BUILD_CMD= $(GO_BUILD) -o "$(OUTDIR)"
+
+all: get generate tidy build
 
 clean: ; $(info $(M) cleaning…)
 	rm -rf $(TMPDIR)

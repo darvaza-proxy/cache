@@ -183,7 +183,7 @@ func (g *Group) Get(ctx context.Context, key string, sink cache.Sink) error {
 
 // Remove removes an entry from the Group
 func (g *Group) Remove(ctx context.Context, key string) {
-	g.g.Remove(ctx, key)
+	_ = g.g.Remove(ctx, key)
 }
 
 // Stats returns stats about the Group
