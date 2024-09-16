@@ -11,7 +11,7 @@ require (
 	darvaza.org/cache v0.2.6
 	darvaza.org/cache/x/simplelru v0.1.8
 	darvaza.org/core v0.14.6
-	darvaza.org/slog v0.5.7
+	darvaza.org/slog v0.5.8
 )
 
 require (
