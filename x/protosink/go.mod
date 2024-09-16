@@ -6,7 +6,7 @@ replace darvaza.org/cache => ../../
 
 require (
 	darvaza.org/cache v0.2.6
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.34.2
 )
 
 require (
