@@ -6,8 +6,8 @@ replace darvaza.org/cache => ../../
 
 require (
 	darvaza.org/cache v0.2.6
-	darvaza.org/core v0.14.6
-	darvaza.org/slog v0.5.8
+	darvaza.org/core v0.14.7
+	darvaza.org/slog v0.5.10
 	github.com/mailgun/groupcache/v2 v2.5.0
 )
 
