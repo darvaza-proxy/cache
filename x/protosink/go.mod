@@ -5,7 +5,7 @@ go 1.19
 replace darvaza.org/cache => ../../
 
 require (
-	darvaza.org/cache v0.2.6
+	darvaza.org/cache v0.2.7
 	google.golang.org/protobuf v1.34.2
 )
 
