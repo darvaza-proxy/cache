@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	darvaza.org/cache v0.2.7
-	darvaza.org/core v0.14.7
-	darvaza.org/slog v0.5.10
+	darvaza.org/core v0.14.10
+	darvaza.org/slog v0.5.11
 )
 
 require github.com/mailgun/groupcache/v2 v2.5.0

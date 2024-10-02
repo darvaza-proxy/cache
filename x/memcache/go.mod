@@ -5,8 +5,8 @@ go 1.20
 require (
 	darvaza.org/cache v0.2.7
 	darvaza.org/cache/x/simplelru v0.1.9
-	darvaza.org/core v0.14.7
-	darvaza.org/slog v0.5.10
+	darvaza.org/core v0.14.10
+	darvaza.org/slog v0.5.11
 )
 
 require (
