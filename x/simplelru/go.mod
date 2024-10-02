@@ -1,6 +1,6 @@
 module darvaza.org/cache/x/simplelru
 
-go 1.19
+go 1.20
 
 require darvaza.org/core v0.14.7
 
