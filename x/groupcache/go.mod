@@ -1,15 +1,14 @@
 module darvaza.org/cache/x/groupcache
 
-go 1.19
-
-replace darvaza.org/cache => ../../
+go 1.20
 
 require (
 	darvaza.org/cache v0.2.7
-	darvaza.org/core v0.14.7
-	darvaza.org/slog v0.5.10
-	github.com/mailgun/groupcache/v2 v2.5.0
+	darvaza.org/core v0.14.10
+	darvaza.org/slog v0.5.11
 )
+
+require github.com/mailgun/groupcache/v2 v2.5.0
 
 require (
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -22,3 +21,5 @@ require (
 	golang.org/x/text v0.18.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 )
+
+replace darvaza.org/cache => ../../

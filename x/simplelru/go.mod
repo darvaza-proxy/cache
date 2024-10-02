@@ -1,8 +1,8 @@
 module darvaza.org/cache/x/simplelru
 
-go 1.19
+go 1.20
 
-require darvaza.org/core v0.14.7
+require darvaza.org/core v0.14.10
 
 require (
 	golang.org/x/net v0.29.0 // indirect

@@ -1,10 +1,10 @@
 module darvaza.org/cache
 
-go 1.19
+go 1.20
 
 require (
-	darvaza.org/core v0.14.7
-	darvaza.org/slog v0.5.10
+	darvaza.org/core v0.14.10
+	darvaza.org/slog v0.5.11
 )
 
 require (
