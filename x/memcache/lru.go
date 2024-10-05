@@ -174,11 +174,11 @@ func (m *LRU[K]) toUnit(bytes int64) int {
 	return bytesToSize(m.unit, bytes)
 }
 
-func calculateUnit(max int64) (unit uint) {
+func calculateUnit(maxV int64) (unit uint) {
 	unit = 1
-	for max > GiB {
+	for maxV > GiB {
 		unit *= KiB
-		max /= KiB
+		maxV /= KiB
 	}
 	return unit
 }
