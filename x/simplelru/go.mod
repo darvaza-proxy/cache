@@ -4,7 +4,7 @@ go 1.21
 
 toolchain go1.22.6
 
-require darvaza.org/core v0.15.0
+require darvaza.org/core v0.15.2
 
 require (
 	golang.org/x/net v0.30.0 // indirect

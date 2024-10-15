@@ -7,7 +7,7 @@ toolchain go1.22.6
 require (
 	darvaza.org/cache v0.2.8
 	darvaza.org/cache/x/simplelru v0.1.10
-	darvaza.org/core v0.15.1
+	darvaza.org/core v0.15.2
 	darvaza.org/slog v0.5.12
 )
 
