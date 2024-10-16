@@ -87,7 +87,7 @@ func (p *Pool) NewCache(name string, cacheBytes int64, getter cache.Getter) cach
 
 		// unreachable
 		core.Panicf("groupcache[%q]: %s", name, "where is my sink??")
-		return cache.ErrInvalid
+		return core.ErrInvalid
 	}
 
 	if g := groupcache.NewGroup(name, cacheBytes,
@@ -155,7 +155,7 @@ func (g *Group) Get(ctx context.Context, key string, sink cache.Sink) error {
 	var b groupcache.ByteView
 
 	if sink == nil {
-		return cache.ErrInvalid
+		return core.ErrInvalid
 	}
 
 	// get a clean slate and attach sink to the context
