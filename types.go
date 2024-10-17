@@ -1,14 +1,21 @@
 package cache
 
-import "darvaza.org/slog"
+import (
+	"errors"
+
+	"darvaza.org/slog"
+)
+
+// ErrInvalidSink tells the [Sink] isn't in a usable state.
+var ErrInvalidSink = errors.New("invalid sink")
 
 // A Store allows us to create or access Cache namespaces
 type Store interface {
 	// GetCache returns the named cache previously created with
 	// NewCache, or nil if there's no such namespace.
-	GetCache(name string) Cache
+	GetCache(name string) Cache[string]
 	// NewCache creates a new Cache namespace
-	NewCache(name string, cacheBytes int64, getter Getter) Cache
+	NewCache(name string, cacheBytes int64, getter Getter[string]) Cache[string]
 	// DeregisterCache removes a Cache namespace
 	DeregisterCache(name string)
 

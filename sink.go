@@ -6,16 +6,9 @@ import (
 
 // Sink receives data from a Get call
 type Sink interface {
-	// SetString sets the value to s.
-	SetString(s string, e time.Time) error
-
 	// SetBytes sets the value to the contents of v.
 	// The caller retains ownership of v.
 	SetBytes(v []byte, e time.Time) error
-
-	// SetValue sets the value to the object v.
-	// The caller retains ownership of v.
-	SetValue(v any, e time.Time) error
 
 	// Bytes returns the value encoded as a slice
 	// of bytes
@@ -31,4 +24,17 @@ type Sink interface {
 
 	// Reset empties the content of the Sink
 	Reset()
+}
+
+// TSink extends [Sink] with type-specific SetValue/Value
+// methods.
+type TSink[V any] interface {
+	Sink
+
+	// SetValue sets the value to the object v.
+	// The caller retains ownership of v.
+	SetValue(v *V, e time.Time) error
+
+	// Value returns a copy of the stored value.
+	Value() (*V, bool)
 }
