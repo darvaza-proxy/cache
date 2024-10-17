@@ -60,7 +60,7 @@ func (sink *GobSink[T]) SetBytes(v []byte, e time.Time) error {
 // the Sink interface
 func (sink *GobSink[T]) SetString(string, time.Time) error {
 	sink.Reset()
-	return ErrInvalid
+	return core.ErrInvalid
 }
 
 // SetValue sets the object of the GobSink and its expiration time
@@ -69,7 +69,7 @@ func (sink *GobSink[T]) SetValue(v any, e time.Time) error {
 
 	p, ok := v.(*T)
 	if !ok {
-		return ErrInvalid
+		return core.ErrInvalid
 	}
 
 	enc := gob.NewEncoder(&buf)

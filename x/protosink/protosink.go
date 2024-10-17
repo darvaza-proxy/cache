@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"darvaza.org/cache"
+	"darvaza.org/core"
 )
 
 var (
@@ -52,7 +53,7 @@ func (sink *ProtoSink) SetBytes(v []byte, e time.Time) error {
 	err := proto.Unmarshal(v, sink.out)
 	if err != nil {
 		sink.Reset()
-		return cache.ErrInvalid
+		return core.ErrInvalid
 	}
 
 	// store
@@ -73,14 +74,14 @@ func (sink *ProtoSink) SetValue(v any, e time.Time) error {
 	p, ok := v.(proto.Message)
 	if !ok {
 		sink.Reset()
-		return cache.ErrInvalid
+		return core.ErrInvalid
 	}
 
 	out, err := proto.Marshal(p)
 	if err != nil {
 		// failed to encode
 		sink.Reset()
-		return cache.ErrInvalid
+		return core.ErrInvalid
 	}
 
 	sink.b = out
