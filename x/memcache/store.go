@@ -10,26 +10,26 @@ import (
 )
 
 var (
-	_ cache.Store = (*Store)(nil)
+	_ cache.Store[string] = (*Store[string])(nil)
 )
 
 // Store manages in-memory [cache.Cache]s
-type Store struct {
+type Store[K comparable] struct {
 	mu  sync.Mutex
 	log slog.Logger
-	m   map[string]*Cache
+	m   map[string]*Cache[K]
 }
 
 // New creates a new [Store]
-func New() *Store {
-	s := &Store{
-		m: make(map[string]*Cache),
+func New[K comparable]() *Store[K] {
+	s := &Store[K]{
+		m: make(map[string]*Cache[K]),
 	}
 	return s
 }
 
 // DeregisterCache disconnects a [Cache] from the [Store]
-func (s *Store) DeregisterCache(name string) {
+func (s *Store[K]) DeregisterCache(name string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -40,7 +40,7 @@ func (s *Store) DeregisterCache(name string) {
 }
 
 // GetCache finds a [Cache] by name in the [Store]
-func (s *Store) GetCache(name string) cache.Cache {
+func (s *Store[K]) GetCache(name string) cache.Cache[K] {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -52,7 +52,7 @@ func (s *Store) GetCache(name string) cache.Cache {
 }
 
 // NewCache creates a new in-memory [Cache] attached to the [Store]
-func (s *Store) NewCache(name string, cacheBytes int64, getter cache.Getter) cache.Cache {
+func (s *Store[K]) NewCache(name string, cacheBytes int64, getter cache.Getter[K]) cache.Cache[K] {
 	if name == "" || getter == nil {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (s *Store) NewCache(name string, cacheBytes int64, getter cache.Getter) cac
 		core.Panicf("%s: %s", name, "cache already registered")
 	}
 
-	g := NewCache(name, cacheBytes, getter)
+	g := NewCache[K](name, cacheBytes, getter)
 	g.SetLogger(s.log)
 	s.m[name] = g
 
@@ -75,20 +75,20 @@ func (s *Store) NewCache(name string, cacheBytes int64, getter cache.Getter) cac
 }
 
 // SetLogger attaches a [slog.Logger] to the store and any new Cache created through it
-func (s *Store) SetLogger(log slog.Logger) {
+func (s *Store[K]) SetLogger(log slog.Logger) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	s.log = log
 }
 
-func (s *Store) withLogger(level slog.LogLevel) (slog.Logger, bool) {
+func (s *Store[K]) withLogger(level slog.LogLevel) (slog.Logger, bool) {
 	if s.log != nil {
 		return s.log.WithLevel(level).WithEnabled()
 	}
 	return nil, false
 }
 
-func (s *Store) withDebug() (slog.Logger, bool) {
+func (s *Store[K]) withDebug() (slog.Logger, bool) {
 	return s.withLogger(slog.Debug)
 }

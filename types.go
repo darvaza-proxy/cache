@@ -3,12 +3,12 @@ package cache
 import "darvaza.org/slog"
 
 // A Store allows us to create or access Cache namespaces
-type Store interface {
+type Store[K comparable] interface {
 	// GetCache returns the named cache previously created with NewCache,
 	// or nil if there's no such namespace.
-	GetCache(name string) Cache
+	GetCache(name string) Cache[K]
 	// NewCache creates a new Cache namespace
-	NewCache(name string, cacheBytes int64, getter Getter) Cache
+	NewCache(name string, cacheBytes int64, getter Getter[K]) Cache[K]
 	// DeregisterCache removes a Cache namespace
 	DeregisterCache(name string)
 
