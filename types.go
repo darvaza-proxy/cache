@@ -1,6 +1,8 @@
 package cache
 
-import "darvaza.org/slog"
+import (
+	"darvaza.org/slog"
+)
 
 // A Store allows us to create or access Cache namespaces
 type Store[K comparable] interface {
