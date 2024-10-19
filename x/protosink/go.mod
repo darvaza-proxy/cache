@@ -5,12 +5,12 @@ go 1.21
 toolchain go1.22.6
 
 require (
-	darvaza.org/cache v0.2.9
+	darvaza.org/cache v0.2.10
 	darvaza.org/core v0.15.2
-	darvaza.org/slog v0.5.12 // indirect
+	darvaza.org/slog v0.5.14 // indirect
 )
 
-require google.golang.org/protobuf v1.34.2
+require google.golang.org/protobuf v1.35.1
 
 require (
 	github.com/google/go-cmp v0.6.0 // indirect
