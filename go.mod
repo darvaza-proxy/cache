@@ -6,7 +6,7 @@ toolchain go1.22.6
 
 require (
 	darvaza.org/core v0.15.2
-	darvaza.org/slog v0.5.12
+	darvaza.org/slog v0.5.14
 )
 
 require (
