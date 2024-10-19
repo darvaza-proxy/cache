@@ -11,42 +11,42 @@ import (
 )
 
 var (
-	_ cache.Getter = (*SingleFlight)(nil)
-	_ cache.Setter = (*SingleFlight)(nil)
+	_ cache.Getter[string] = (*SingleFlight[string])(nil)
+	_ cache.Setter[string] = (*SingleFlight[string])(nil)
 )
 
 // SingleFlight is a man-in-the-middle between [cache.Cache] and
 // our [LRU] to prevent stampedes
-type SingleFlight struct {
+type SingleFlight[K comparable] struct {
 	name    string
 	mu      sync.Mutex
 	log     slog.Logger
-	inward  AdderGetter[string]
-	outward cache.Getter
-	getters map[string]*outreacher
+	inward  AdderGetter[K]
+	outward cache.Getter[K]
+	getters map[K]*outreacher[K]
 }
 
 // NewSingleFlight creates a new [SingleFlight] controller, with an [LRU] for
 // local cache and a [cache.Getter] to acquire the data externally.
 // [SingleFlight] will prevent multiple requests for the same key to reach out
 // at the same time.
-func NewSingleFlight(name string, inward AdderGetter[string], outward cache.Getter) *SingleFlight {
+func NewSingleFlight[K comparable](name string, inward AdderGetter[K], outward cache.Getter[K]) *SingleFlight[K] {
 	if inward == nil || outward == nil {
 		core.Panic("missing parameters")
 	}
 
-	sf := &SingleFlight{
+	sf := &SingleFlight[K]{
 		name:    name,
 		inward:  inward,
 		outward: outward,
-		getters: make(map[string]*outreacher),
+		getters: make(map[K]*outreacher[K]),
 	}
 
 	return sf
 }
 
 // Name returns the name of the Cache namespace
-func (sf *SingleFlight) Name() string {
+func (sf *SingleFlight[K]) Name() string {
 	return sf.name
 }
 
@@ -57,7 +57,7 @@ func (sf *SingleFlight) Name() string {
 // Get attempts to get the value of a key from its internal cache, otherwise reaches
 // out to the provided [cache.Getter], but only once. While this is in process any other
 // request for the same key will be held until we have a response from from the first.
-func (sf *SingleFlight) Get(ctx context.Context, key string, dest cache.Sink) error {
+func (sf *SingleFlight[K]) Get(ctx context.Context, key K, dest cache.Sink) error {
 	// revive:enable:cognitive-complexity
 	// revive:enable:cyclomatic
 	// revive:enable:function-length
@@ -167,7 +167,7 @@ func (sf *SingleFlight) Get(ctx context.Context, key string, dest cache.Sink) er
 }
 
 // Set stores the value for a key inward, and shares it with anyway waiting for it
-func (sf *SingleFlight) Set(_ context.Context, key string, value []byte,
+func (sf *SingleFlight[K]) Set(_ context.Context, key K, value []byte,
 	expire time.Time, _ cache.Type) error {
 	//
 	sf.mu.Lock()
@@ -184,14 +184,14 @@ func (sf *SingleFlight) Set(_ context.Context, key string, value []byte,
 }
 
 // SetLogger attaches a [slog.Logger] to this [SingleFlight] quasi-[cache.Cache]
-func (sf *SingleFlight) SetLogger(log slog.Logger) {
+func (sf *SingleFlight[K]) SetLogger(log slog.Logger) {
 	sf.mu.Lock()
 	defer sf.mu.Unlock()
 
 	sf.log = log
 }
 
-func (sf *SingleFlight) withLogger(level slog.LogLevel) (slog.Logger, bool) {
+func (sf *SingleFlight[K]) withLogger(level slog.LogLevel) (slog.Logger, bool) {
 	if sf.log != nil {
 		log, ok := sf.log.WithLevel(level).WithEnabled()
 		if ok {
@@ -202,11 +202,11 @@ func (sf *SingleFlight) withLogger(level slog.LogLevel) (slog.Logger, bool) {
 	return nil, false
 }
 
-func (sf *SingleFlight) withDebug() (slog.Logger, bool) {
+func (sf *SingleFlight[K]) withDebug() (slog.Logger, bool) {
 	return sf.withLogger(slog.Debug)
 }
 
-func (sf *SingleFlight) getCond(key string) (*outreacher, bool) {
+func (sf *SingleFlight[K]) getCond(key K) (*outreacher[K], bool) {
 	p, ok := sf.getters[key]
 	if ok {
 		// old
@@ -214,7 +214,7 @@ func (sf *SingleFlight) getCond(key string) (*outreacher, bool) {
 	}
 
 	// new
-	p = &outreacher{
+	p = &outreacher[K]{
 		parent: sf,
 		cond:   sync.NewCond(&sf.mu),
 		key:    key,
@@ -224,11 +224,11 @@ func (sf *SingleFlight) getCond(key string) (*outreacher, bool) {
 	return p, true
 }
 
-type outreacher struct {
-	parent *SingleFlight
+type outreacher[K comparable] struct {
+	parent *SingleFlight[K]
 	count  int
 	cond   *sync.Cond
-	key    string
+	key    K
 
 	done bool
 	err  error
@@ -236,22 +236,22 @@ type outreacher struct {
 	ex   time.Time
 }
 
-// Expire returns the error set by a failed outward.Get()
-func (p *outreacher) Err() error { return p.err }
+// Err returns the error set by a failed outward.Get()
+func (p *outreacher[K]) Err() error { return p.err }
 
-// Expire returns the data set by a successful outward.Get()
-func (p *outreacher) Bytes() []byte { return p.b }
+// Bytes returns the data set by a successful outward.Get()
+func (p *outreacher[K]) Bytes() []byte { return p.b }
 
 // Expire returns the expiration date set by a successful outward.Get()
-func (p *outreacher) Expire() time.Time { return p.ex }
+func (p *outreacher[K]) Expire() time.Time { return p.ex }
 
 // Ok tells if a value has been stored
-func (p *outreacher) Ok() bool {
+func (p *outreacher[K]) Ok() bool {
 	return p.done && p.err == nil
 }
 
 // SetBytes stores the result of a successful outward.Get()
-func (p *outreacher) SetBytes(v []byte, e time.Time) {
+func (p *outreacher[K]) SetBytes(v []byte, e time.Time) {
 	defer p.cond.Broadcast()
 
 	p.done = true
@@ -260,7 +260,7 @@ func (p *outreacher) SetBytes(v []byte, e time.Time) {
 }
 
 // SetError indicates outward.Get() failed
-func (p *outreacher) SetError(err error) {
+func (p *outreacher[K]) SetError(err error) {
 	defer p.cond.Broadcast()
 
 	p.done = true
@@ -269,7 +269,7 @@ func (p *outreacher) SetError(err error) {
 
 // Wait patiently waits until the outreacher has finished its attempt
 // to get the data
-func (p *outreacher) Wait() {
+func (p *outreacher[K]) Wait() {
 	p.count++
 	for !p.done {
 		p.cond.Wait()
@@ -279,7 +279,7 @@ func (p *outreacher) Wait() {
 }
 
 // Done makes the [SingleFlight] parent forget about the block on this key
-func (p *outreacher) Done() bool {
+func (p *outreacher[K]) Done() bool {
 	if p.count < 1 {
 		delete(p.parent.getters, p.key)
 		return true
