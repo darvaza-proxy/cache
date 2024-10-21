@@ -9,108 +9,136 @@ import (
 )
 
 var (
-	_ Sink = (*GobSink[any])(nil)
+	_ Sink       = (*GobSink[any])(nil)
+	_ TSink[any] = (*GobSink[any])(nil)
 )
 
 // GobSink is a Sink using generics for type safety and Gob
 // for encoding
 type GobSink[T any] struct {
-	out   *T
-	e     time.Time
-	bytes []byte
-}
+	ByteSink
 
-// Bytes returns the Gob encoded representation of the object
-// in the Sink
-func (sink *GobSink[T]) Bytes() []byte {
-	return sink.bytes
-}
-
-// Len returns the length of the Gob encoded representation of the
-// object in the Sink. 0 if empty.
-func (sink *GobSink[T]) Len() int {
-	return len(sink.bytes)
-}
-
-// Expire tells when this object will be evicted from the Cache
-func (sink *GobSink[T]) Expire() time.Time {
-	return sink.e
+	val *T
 }
 
 // SetBytes sets the object of the GobSink and its expiration time
 // from a Gob encoded byte array
-func (sink *GobSink[T]) SetBytes(v []byte, e time.Time) error {
-	buf := bytes.NewBuffer(v)
-	dec := gob.NewDecoder(buf)
+func (sink *GobSink[T]) SetBytes(b []byte, e time.Time) error {
+	switch {
+	case len(b) == 0:
+		return ErrNoData
+	case sink == nil:
+		return core.ErrNilReceiver
+	default:
+		v := new(T)
+		if err := DecodeGob(b, v); err != nil {
+			// failed to decode
+			return core.Wrap(err, "decode")
+		}
 
-	if err := dec.Decode(sink.out); err != nil {
-		// failed to decode
-		sink.Reset()
-		return err
+		if err := sink.ByteSink.SetBytes(b, e); err != nil {
+			// failed to store bytes
+			sink.Reset()
+			return err
+		}
+
+		sink.val = v
+		return nil
 	}
-
-	// store
-	sink.bytes = make([]byte, len(v))
-	sink.e = e
-	copy(sink.bytes, v)
-	return nil
-}
-
-// SetString isn't supported by GobSink, but its needed to satisfy
-// the Sink interface
-func (sink *GobSink[T]) SetString(string, time.Time) error {
-	sink.Reset()
-	return core.ErrInvalid
 }
 
 // SetValue sets the object of the GobSink and its expiration time
-func (sink *GobSink[T]) SetValue(v any, e time.Time) error {
-	var buf bytes.Buffer
+func (sink *GobSink[T]) SetValue(v *T, e time.Time) error {
+	switch {
+	case v == nil:
+		return ErrNoData
+	case sink == nil:
+		return core.ErrNilReceiver
+	default:
+		b, err := EncodeGob(v)
+		if err != nil {
+			// failed to encode
+			return core.Wrap(err, "encode")
+		}
 
-	p, ok := v.(*T)
-	if !ok {
-		return core.ErrInvalid
+		if err := sink.ByteSink.UnsafeSetBytes(b, e); err != nil {
+			// failed to store bytes
+			sink.Reset()
+			return err
+		}
+
+		p, _ := DefaultClone(v)
+		sink.val = p
+
+		return nil
 	}
-
-	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(p); err != nil {
-		sink.Reset()
-		return err
-	}
-
-	sink.bytes = buf.Bytes()
-	sink.e = e
-	*sink.out = *p
-	return nil
 }
 
 // Value gives a copy of the stored object
-func (sink *GobSink[T]) Value() T {
-	if sink.out == nil {
-		var zero T
-		return zero
+func (sink *GobSink[T]) Value() (*T, bool) {
+	if sink == nil {
+		// invalid
+		return nil, false
 	}
-	return *sink.out
+
+	// copy
+	if sink.val != nil {
+		out, ok := DefaultClone(sink.val)
+		if ok {
+			return out, true
+		}
+	}
+	// decode new
+	if b := sink.Bytes(); len(b) > 0 {
+		out := new(T)
+		if err := DecodeGob(b, out); err == nil {
+			return out, true
+		}
+	}
+
+	return nil, false
 }
 
 // Reset clears everything but the type pointer
 // assigned during creation
 func (sink *GobSink[T]) Reset() {
-	sink.bytes = []byte{}
-	sink.e = time.Time{}
-
-	if sink.out != nil {
-		var zero T
-		*sink.out = zero
+	if sink != nil {
+		sink.ByteSink.Reset()
+		sink.val = nil
 	}
 }
 
-// NewGobSink creates a new Sink using Gob as encoding
-// and stores the object in the provided pointer
-func NewGobSink[T any](out *T) *GobSink[T] {
-	if out == nil {
-		var zero T
-		core.Panicf("NewGobSink[%T]: output can not be nil", zero)
+// DecodeGob attempts to transform a byte slice into a Go
+// object using Gob encoding.
+func DecodeGob[T any](b []byte, out *T) error {
+	if len(b) == 0 {
+		return ErrNoData
 	}
-	return &GobSink[T]{out: out}
+
+	if out == nil {
+		// error-only call
+		out = new(T)
+	}
+
+	buf := bytes.NewBuffer(b)
+	dec := gob.NewDecoder(buf)
+
+	return dec.Decode(out)
+}
+
+// EncodeGob attempts to transform a Go object to a
+// bytes slice using Gob encoding.
+func EncodeGob[T any](p *T) ([]byte, error) {
+	var buf bytes.Buffer
+
+	if p == nil {
+		return nil, ErrNoData
+	}
+
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(p); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
