@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	_ cache.Store  = (*HTTPPool)(nil)
-	_ http.Handler = (*HTTPPool)(nil)
-	_ cache.Store  = (*Pool)(nil)
-	_ cache.Cache  = (*Group)(nil)
+	_ cache.Store[string] = (*HTTPPool)(nil)
+	_ http.Handler        = (*HTTPPool)(nil)
+	_ cache.Store[string] = (*Pool)(nil)
+	_ cache.Cache[string] = (*Group)(nil)
 )
 
 // NewPool creates a Store placeholder to be used as entrypoint
@@ -77,7 +77,7 @@ func NewNoPeersPool() *Pool {
 }
 
 // NewCache creates a new Group
-func (p *Pool) NewCache(name string, cacheBytes int64, getter cache.Getter) cache.Cache {
+func (p *Pool) NewCache(name string, cacheBytes int64, getter cache.Getter[string]) cache.Cache[string] {
 	// wrap
 	fn := func(ctx context.Context, key string, dst groupcache.Sink) error {
 		sink, ok := ctxSink.Get(ctx)
@@ -100,7 +100,7 @@ func (p *Pool) NewCache(name string, cacheBytes int64, getter cache.Getter) cach
 // getBridged calls the getter using the Sink in the context, and then copies the
 // binary encoded representation in groupcache's Sink so it gets cached
 func (*Pool) getBridged(ctx context.Context, key string,
-	getter cache.Getter, sink cache.Sink, dst groupcache.Sink) error {
+	getter cache.Getter[string], sink cache.Sink, dst groupcache.Sink) error {
 	//
 	err := getter.Get(ctx, key, sink)
 	if err == nil {
@@ -111,7 +111,7 @@ func (*Pool) getBridged(ctx context.Context, key string,
 }
 
 // GetCache returns a named Group previously created
-func (*Pool) GetCache(name string) cache.Cache {
+func (*Pool) GetCache(name string) cache.Cache[string] {
 	if g := groupcache.GetGroup(name); g != nil {
 		return &Group{g}
 	}
