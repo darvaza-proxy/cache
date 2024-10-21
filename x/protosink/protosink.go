@@ -6,93 +6,134 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"darvaza.org/cache"
 	"darvaza.org/core"
 )
 
 var (
-	_ cache.Sink = (*ProtoSink)(nil)
+	_ cache.Sink                = NewProtoSink[dummyMessage]()
+	_ cache.TSink[dummyMessage] = NewProtoSink[dummyMessage]()
 )
 
+type dummyMessage struct{}
+
+func (*dummyMessage) ProtoReflect() protoreflect.Message { return nil }
+
+// ProtoMessage is a generic constraint for a type which pointer implements proto.Message
+type ProtoMessage[T any] interface {
+	proto.Message
+	*T
+}
+
 // ProtoSink is a Sink using Proto for encoding
-type ProtoSink struct {
-	out proto.Message
-	b   []byte
-	e   time.Time
-}
+type ProtoSink[T any, M ProtoMessage[T]] struct {
+	cache.ByteSink
 
-// Bytes returns the Protobuf encoded representation of the
-// object in the Sink.
-func (sink *ProtoSink) Bytes() []byte {
-	return sink.b
-}
-
-// Len returns the length of the Protobuf encoded representation of the
-// object in the Sink. 0 if empty
-func (sink *ProtoSink) Len() int {
-	return len(sink.b)
-}
-
-// Expire tells when this object will be evicted from the Cache
-func (sink *ProtoSink) Expire() time.Time {
-	return sink.e
+	val *T
 }
 
 // Reset clears everything but the type pointer assigned during creation
-func (sink *ProtoSink) Reset() {
-	sink.b = []byte{}
-	sink.e = time.Time{}
-	// TODO: how do we clear *sink.out ?
+func (sink *ProtoSink[T, M]) Reset() {
+	if sink != nil {
+		sink.ByteSink.Reset()
+		sink.val = nil
+	}
 }
 
 // SetBytes sets the object of the ProtoSink and its expiration time
 // from a Protobuf encoded byte array
-func (sink *ProtoSink) SetBytes(v []byte, e time.Time) error {
-	// decode
-	err := proto.Unmarshal(v, sink.out)
-	if err != nil {
-		sink.Reset()
-		return core.ErrInvalid
+func (sink *ProtoSink[T, M]) SetBytes(b []byte, e time.Time) error {
+	switch {
+	case len(b) == 0:
+		return cache.ErrNoData
+	case sink == nil:
+		return core.ErrNilReceiver
+	default:
+		v := new(T)
+		if err := sink.doDecode(b, v); err != nil {
+			// failed to decode
+			return core.Wrap(err, "decode")
+		}
+
+		if err := sink.ByteSink.SetBytes(b, e); err != nil {
+			// failed to store bytes
+			sink.Reset()
+			return err
+		}
+
+		sink.val = v
+		return nil
 	}
-
-	// store
-	sink.b = make([]byte, len(v))
-	sink.e = e
-	copy(sink.b, v)
-	return nil
-}
-
-// SetString sets the object of the ProtoSink and its expiration time
-// from a Protobuf encoded string
-func (sink *ProtoSink) SetString(s string, e time.Time) error {
-	return sink.SetBytes([]byte(s), e)
 }
 
 // SetValue sets the object of the ProtoSink and its expiration time
-func (sink *ProtoSink) SetValue(v any, e time.Time) error {
-	p, ok := v.(proto.Message)
-	if !ok {
-		sink.Reset()
-		return core.ErrInvalid
-	}
+func (sink *ProtoSink[T, M]) SetValue(v *T, e time.Time) error {
+	switch {
+	case v == nil:
+		return cache.ErrNoData
+	case sink == nil:
+		return core.ErrNilReceiver
+	default:
+		b, err := sink.doEncode(v)
+		if err != nil {
+			// failed to encode
+			return core.Wrap(err, "encode")
+		}
 
-	out, err := proto.Marshal(p)
-	if err != nil {
-		// failed to encode
-		sink.Reset()
-		return core.ErrInvalid
-	}
+		if err := sink.ByteSink.UnsafeSetBytes(b, e); err != nil {
+			// failed to store bytes
+			sink.Reset()
+			return err
+		}
 
-	sink.b = out
-	sink.e = e
-	if sink.out != nil {
-		sink.out = p
+		p, _ := cache.DefaultClone(v)
+		sink.val = p
+		return nil
 	}
-	return nil
 }
 
 // Value returns the stored object
-func (sink *ProtoSink) Value() proto.Message {
-	return sink.out
+func (sink *ProtoSink[T, M]) Value() (*T, bool) {
+	if sink == nil {
+		// invalid
+		return nil, false
+	}
+
+	// copy
+	if sink.val != nil {
+		out, ok := cache.DefaultClone(sink.val)
+		if ok {
+			return out, true
+		}
+	}
+
+	// decode new
+	if b := sink.Bytes(); len(b) > 0 {
+		out := new(T)
+		if err := sink.doDecode(b, out); err == nil {
+			return out, true
+		}
+	}
+
+	return nil, false
+}
+
+func (*ProtoSink[T, M]) doEncode(v *T) ([]byte, error) {
+	return proto.Marshal((M)(v))
+}
+
+func (*ProtoSink[T, M]) doDecode(b []byte, out *T) error {
+	if out == nil {
+		// errors only
+		out = new(T)
+	}
+
+	return proto.Unmarshal(b, (M)(out))
+}
+
+// NewProtoSink creates a [ProtoSink] for a particular proto.Message type
+func NewProtoSink[T any, M ProtoMessage[T]]() cache.TSink[T] {
+	return new(ProtoSink[T, M])
 }
