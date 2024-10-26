@@ -7,28 +7,30 @@ import (
 )
 
 var (
-	_ cache.Cache = (*Cache)(nil)
+	_ cache.Cache[string]   = (*Cache[string])(nil)
+	_ cache.Cache[uint32]   = (*Cache[uint32])(nil)
+	_ cache.Cache[[32]byte] = (*Cache[[32]byte])(nil)
 )
 
 // Cache is a LRU with TTL [cache.Cache]
-type Cache struct {
-	*SingleFlight
+type Cache[K comparable] struct {
+	*SingleFlight[K]
 
-	lru *LRU[string]
+	lru *LRU[K]
 }
 
 // NewCache creates a new [Cache] with a maximum size and [cache.Getter]
-func NewCache(name string, cacheBytes int64, getter cache.Getter) *Cache {
-	g := &Cache{}
+func NewCache[K comparable](name string, cacheBytes int64, getter cache.Getter[K]) *Cache[K] {
+	g := &Cache[K]{}
 	lru := NewLRU(cacheBytes, nil, g.onEvict)
 
 	g.lru = lru
-	g.SingleFlight = NewSingleFlight(name, lru, getter)
+	g.SingleFlight = NewSingleFlight[K](name, lru, getter)
 
 	return g
 }
 
-func (g *Cache) onEvict(key string, _ []byte, size int64) {
+func (g *Cache[K]) onEvict(key K, _ []byte, size int64) {
 	if log, ok := g.withDebug(); ok {
 		log.WithField("key", key).
 			WithField("size", size).
@@ -37,13 +39,13 @@ func (g *Cache) onEvict(key string, _ []byte, size int64) {
 }
 
 // Stats returns statistics about the Cache. This implementation doesn't
-// distinuish among types
-func (g *Cache) Stats(_ cache.Type) cache.Stats {
+// distinguish among types
+func (g *Cache[K]) Stats(_ cache.Type) cache.Stats {
 	return g.lru.Stats()
 }
 
 // Remove evicts an entry from the [Cache]
-func (g *Cache) Remove(_ context.Context, key string) {
+func (g *Cache[K]) Remove(_ context.Context, key K) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
