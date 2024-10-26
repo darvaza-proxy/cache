@@ -7,7 +7,9 @@ import (
 )
 
 var (
-	_ cache.Cache[string] = (*Cache[string])(nil)
+	_ cache.Cache[string]   = (*Cache[string])(nil)
+	_ cache.Cache[uint32]   = (*Cache[uint32])(nil)
+	_ cache.Cache[[32]byte] = (*Cache[[32]byte])(nil)
 )
 
 // Cache is a LRU with TTL [cache.Cache]

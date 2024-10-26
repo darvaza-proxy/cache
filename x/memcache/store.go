@@ -10,7 +10,9 @@ import (
 )
 
 var (
-	_ cache.Store[string] = (*Store[string])(nil)
+	_ cache.Store[string]   = (*Store[string])(nil)
+	_ cache.Store[uint32]   = (*Store[uint32])(nil)
+	_ cache.Store[[32]byte] = (*Store[[32]byte])(nil)
 )
 
 // Store manages in-memory [cache.Cache]s

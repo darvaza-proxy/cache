@@ -13,6 +13,12 @@ import (
 var (
 	_ cache.Getter[string] = (*SingleFlight[string])(nil)
 	_ cache.Setter[string] = (*SingleFlight[string])(nil)
+
+	_ cache.Getter[uint64] = (*SingleFlight[uint64])(nil)
+	_ cache.Setter[uint64] = (*SingleFlight[uint64])(nil)
+
+	_ cache.Getter[[32]byte] = (*SingleFlight[[32]byte])(nil)
+	_ cache.Setter[[32]byte] = (*SingleFlight[[32]byte])(nil)
 )
 
 // SingleFlight is a man-in-the-middle between [cache.Cache] and
