@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.22.6
 
 require (
-	darvaza.org/cache v0.3.0
+	darvaza.org/cache v0.3.1
 	darvaza.org/core v0.15.2
 	darvaza.org/slog v0.5.14 // indirect
 )
