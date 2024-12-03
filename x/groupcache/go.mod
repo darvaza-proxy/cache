@@ -2,7 +2,7 @@ module darvaza.org/cache/x/groupcache
 
 go 1.21
 
-toolchain go1.22.6
+toolchain go1.23.4
 
 require (
 	darvaza.org/cache v0.3.0
