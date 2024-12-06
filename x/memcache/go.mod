@@ -7,13 +7,13 @@ toolchain go1.22.6
 require (
 	darvaza.org/cache v0.3.1
 	darvaza.org/cache/x/simplelru v0.1.10
-	darvaza.org/core v0.15.2
+	darvaza.org/core v0.15.3
 	darvaza.org/slog v0.5.14
 )
 
 require (
-	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/net v0.31.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 )
 
 replace (

@@ -6,7 +6,7 @@ toolchain go1.22.6
 
 require (
 	darvaza.org/cache v0.3.1
-	darvaza.org/core v0.15.2
+	darvaza.org/core v0.15.3
 	darvaza.org/slog v0.5.14
 )
 
@@ -18,9 +18,9 @@ require (
 	github.com/segmentio/fasthash v1.0.3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
-	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/net v0.31.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
 )
 
