@@ -2,8 +2,6 @@ module darvaza.org/cache/x/memcache
 
 go 1.21
 
-toolchain go1.22.6
-
 require (
 	darvaza.org/cache v0.3.2
 	darvaza.org/cache/x/simplelru v0.1.11

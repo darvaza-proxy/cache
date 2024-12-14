@@ -2,8 +2,6 @@ module darvaza.org/cache/x/protosink
 
 go 1.21
 
-toolchain go1.22.6
-
 require (
 	darvaza.org/cache v0.3.2
 	darvaza.org/core v0.15.4
