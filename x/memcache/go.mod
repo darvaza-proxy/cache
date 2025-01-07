@@ -3,7 +3,7 @@ module darvaza.org/cache/x/memcache
 go 1.21
 
 require (
-	darvaza.org/cache v0.3.2
+	darvaza.org/cache v0.3.3
 	darvaza.org/cache/x/simplelru v0.1.11
 	darvaza.org/core v0.15.6
 	darvaza.org/slog v0.5.15
