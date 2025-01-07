@@ -8,7 +8,7 @@ require (
 	darvaza.org/slog v0.5.14 // indirect
 )
 
-require google.golang.org/protobuf v1.36.1
+require google.golang.org/protobuf v1.36.2
 
 require (
 	github.com/google/go-cmp v0.6.0 // indirect
