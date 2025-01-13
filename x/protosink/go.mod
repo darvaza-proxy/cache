@@ -4,8 +4,8 @@ go 1.22
 
 require (
 	darvaza.org/cache v0.3.3
-	darvaza.org/core v0.15.6
-	darvaza.org/slog v0.5.15 // indirect
+	darvaza.org/core v0.16.0
+	darvaza.org/slog v0.6.0 // indirect
 )
 
 require google.golang.org/protobuf v1.36.2

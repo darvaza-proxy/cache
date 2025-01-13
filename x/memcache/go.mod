@@ -5,8 +5,8 @@ go 1.22
 require (
 	darvaza.org/cache v0.3.3
 	darvaza.org/cache/x/simplelru v0.1.11
-	darvaza.org/core v0.15.6
-	darvaza.org/slog v0.5.15
+	darvaza.org/core v0.16.0
+	darvaza.org/slog v0.6.0
 )
 
 require (

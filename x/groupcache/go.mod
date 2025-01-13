@@ -4,8 +4,8 @@ go 1.22
 
 require (
 	darvaza.org/cache v0.3.3
-	darvaza.org/core v0.15.6
-	darvaza.org/slog v0.5.15
+	darvaza.org/core v0.16.0
+	darvaza.org/slog v0.6.0
 )
 
 require github.com/mailgun/groupcache/v2 v2.6.0
