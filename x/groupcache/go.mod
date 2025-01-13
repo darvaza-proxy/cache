@@ -3,7 +3,7 @@ module darvaza.org/cache/x/groupcache
 go 1.22
 
 require (
-	darvaza.org/cache v0.3.3
+	darvaza.org/cache v0.4.0
 	darvaza.org/core v0.16.0
 	darvaza.org/slog v0.6.0
 )
