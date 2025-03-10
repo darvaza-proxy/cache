@@ -5,13 +5,13 @@ go 1.22
 require (
 	darvaza.org/cache v0.4.0
 	darvaza.org/cache/x/simplelru v0.2.0
-	darvaza.org/core v0.16.0
-	darvaza.org/slog v0.6.0
+	darvaza.org/core v0.16.1
+	darvaza.org/slog v0.6.1
 )
 
 require (
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 )
 
 replace (
