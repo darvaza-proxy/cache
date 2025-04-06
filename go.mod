@@ -3,8 +3,8 @@ module darvaza.org/cache
 go 1.22
 
 require (
-	darvaza.org/core v0.16.1
-	darvaza.org/slog v0.6.1
+	darvaza.org/core v0.16.3
+	darvaza.org/slog v0.6.2
 )
 
 require (

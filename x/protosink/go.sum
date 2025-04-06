@@ -1,7 +1,7 @@
-darvaza.org/core v0.16.1 h1:SlxZNDBaCbP7mgHmCLSQFYL65pZP9QbxdE1JfMXgTjM=
-darvaza.org/core v0.16.1/go.mod h1:2waZw8lmo4E9B/R9XltA2bcUmZQURwEoct1iPLesDEQ=
-darvaza.org/slog v0.6.1 h1:yqeRVexveWMw0hc5Cj4EO+GupgSBzms0ffq6sxG2p58=
-darvaza.org/slog v0.6.1/go.mod h1:XeEpDDREfjRGCPlS8IWA3AppoUdBARAY/T7DlBTYUuk=
+darvaza.org/core v0.16.3 h1:Q6pLcbvcBg42cgldEFcln7q6rIbbShDwJVqjSuRDY+U=
+darvaza.org/core v0.16.3/go.mod h1:2waZw8lmo4E9B/R9XltA2bcUmZQURwEoct1iPLesDEQ=
+darvaza.org/slog v0.6.2 h1:EH+xYvrzI9uI8YhMSoGex+Im509Rz73oVqj0jDH71Ag=
+darvaza.org/slog v0.6.2/go.mod h1:BRZRLBroPejx5p7KWHlD4AmF4MkEr7wxOCHXOGnRrWo=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 golang.org/x/net v0.35.0 h1:T5GQRQb2y08kTAByq9L4/bz8cipCdA8FbRTXewonqY8=
