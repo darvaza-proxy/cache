@@ -19,6 +19,8 @@ jobs:
         go-version: ['1.24', '1.25', '1.26']
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - uses: actions/setup-go@v6
       with:
         go-version: ${{ matrix.go-version }}
