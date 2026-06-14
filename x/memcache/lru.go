@@ -9,6 +9,7 @@ import (
 	"darvaza.org/cache/x/simplelru"
 )
 
+// Binary byte-size units (powers of two).
 const (
 	KiB = 1024      // KiB is 2^10 (kilobyte)
 	MiB = KiB * KiB // MiB is 2^20 (megabyte)
