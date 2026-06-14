@@ -66,7 +66,7 @@ func (s *Store[K]) NewCache(name string, cacheBytes int64, getter cache.Getter[K
 		core.Panicf("%s: %s", name, "cache already registered")
 	}
 
-	g := NewCache[K](name, cacheBytes, getter)
+	g := NewCache(name, cacheBytes, getter)
 	g.SetLogger(s.log)
 	s.m[name] = g
 

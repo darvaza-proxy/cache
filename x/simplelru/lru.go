@@ -1,4 +1,4 @@
-// Package simplelru provices a non thread-safe LRU cache with maximum size
+// Package simplelru provides a non thread-safe LRU cache with maximum size
 // and TTL
 package simplelru
 

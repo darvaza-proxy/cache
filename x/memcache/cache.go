@@ -25,7 +25,7 @@ func NewCache[K comparable](name string, cacheBytes int64, getter cache.Getter[K
 	lru := NewLRU(cacheBytes, nil, g.onEvict)
 
 	g.lru = lru
-	g.SingleFlight = NewSingleFlight[K](name, lru, getter)
+	g.SingleFlight = NewSingleFlight(name, lru, getter)
 
 	return g
 }

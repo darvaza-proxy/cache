@@ -61,7 +61,7 @@ func (sink *GobSink[T]) SetValue(v *T, e time.Time) error {
 			return core.Wrap(err, "encode")
 		}
 
-		if err := sink.ByteSink.UnsafeSetBytes(b, e); err != nil {
+		if err := sink.UnsafeSetBytes(b, e); err != nil {
 			// failed to store bytes
 			sink.Reset()
 			return err

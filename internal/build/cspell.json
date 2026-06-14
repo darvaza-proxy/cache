@@ -1,0 +1,25 @@
+{
+  "version": "0.2",
+  "name": "cache",
+  "language": "en-GB",
+  "words": [
+    "Codebeat",
+    "coverpkg",
+    "darvaza",
+    "GOTEST",
+    "groupcache",
+    "outreacher",
+    "protoreflect",
+    "protosink",
+    "simplelru"
+  ],
+  "ignorePaths": [
+    "*.lock",
+    ".coverage",
+    ".git",
+    ".tmp",
+    "go.sum",
+    "node_modules",
+    "vendor"
+  ]
+}
