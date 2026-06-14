@@ -1,0 +1,41 @@
+ignoreGeneratedHeader = false
+severity = "error"
+confidence = 0.8
+errorCode = 1
+warningCode = 0
+enableAllRules = true
+
+[rule.function-length]
+  arguments = [40,0]
+  severity = "warning"
+[rule.function-result-limit]
+  arguments = [3]
+[rule.argument-limit]
+  arguments = [5]
+[rule.cognitive-complexity]
+  arguments = [7]
+[rule.cyclomatic]
+  arguments = [10]
+[rule.line-length-limit]
+  arguments = [120]
+  severity = "warning"
+[rule.comment-spacings]
+  severity = "warning"
+[rule.empty-lines]
+  severity = "warning"
+
+# Disabled rules
+[rule.max-public-structs]
+  disabled = true
+[rule.file-header]
+  disabled = true
+[rule.add-constant]
+  disabled = true
+[rule.banned-characters]
+  disabled = true
+# Config variant for revive v1.14.0 (Go 1.24 tier). Unlike darvaza.org/x,
+# this repo's sub-modules (groupcache, memcache, simplelru, protosink) do
+# not shadow Go stdlib package names, so no `var-naming`
+# `skipPackageNameCollisionWithGoStd` override is required. It is kept as a
+# separate tier file only to match the shared Makefile's `get_version.sh`
+# revive split; its content matches revive.toml.

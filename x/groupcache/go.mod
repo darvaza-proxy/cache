@@ -1,6 +1,6 @@
 module darvaza.org/cache/x/groupcache
 
-go 1.22
+go 1.24.0
 
 require (
 	darvaza.org/cache v0.4.1
