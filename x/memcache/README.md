@@ -1,6 +1,7 @@
 # In-memory cache with TTL and restricted size
 
 [![Go Reference][godoc-badge]][godoc-link]
+[![codecov][codecov-badge]][codecov-link]
 
 ## LRU
 
@@ -17,6 +18,8 @@ This LRU does **NOT** implement the Cache interface.
 
 [godoc-link]: https://pkg.go.dev/darvaza.org/cache/x/memcache
 [godoc-badge]: https://pkg.go.dev/badge/darvaza.org/cache/x/memcache.svg
+[codecov-link]: https://codecov.io/gh/darvaza-proxy/cache
+[codecov-badge]: https://codecov.io/github/darvaza-proxy/cache/graph/badge.svg?flag=memcache
 [cache-link]: https://pkg.go.dev/darvaza.org/cache
 [groupcache-link]: https://pkg.go.dev/darvaza.org/cache/x/groupcache
 [simplelru-link]: https://pkg.go.dev/darvaza.org/cache/x/simplelru
