@@ -8,7 +8,7 @@ require (
 	darvaza.org/slog v0.9.1 // indirect
 )
 
-require google.golang.org/protobuf v1.36.11
+require google.golang.org/protobuf v1.36.12
 
 require (
 	golang.org/x/net v0.50.0 // indirect
