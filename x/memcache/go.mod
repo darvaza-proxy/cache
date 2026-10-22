@@ -1,6 +1,6 @@
 module darvaza.org/cache/x/memcache
 
-go 1.24.0
+go 1.25.0
 
 require (
 	darvaza.org/cache v0.5.0
@@ -10,6 +10,6 @@ require (
 )
 
 require (
-	golang.org/x/net v0.50.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 )
